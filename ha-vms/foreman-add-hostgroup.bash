@@ -1,7 +1,8 @@
 ## Intended be run on the foreman-server
-## Pick up new quickstack modules and changes in seeds.rb
+## Pick up new pacemaker, quickstack modules and changes in seeds.rb
 
 ASTAPOR=/mnt/vm-share/astapor
+PUPPET_PACEMAKER=/mnt/vm-share/puppet-pacemaker
 
 if [ "x$FOREMAN_DIR" = "x" ]; then
   FOREMAN_DIR=/usr/share/foreman
@@ -14,6 +15,11 @@ fi
 rm -rf  /etc/puppet/environments/production/modules/quickstack
 cp -r $ASTAPOR/puppet/modules/quickstack /etc/puppet/environments/production/modules/quickstack
 find /etc/puppet/environments/production/modules/quickstack -name '.git' | xargs rm -rf
+
+# Re-import pacemaker
+rm -rf  /etc/puppet/environments/production/modules/pacemaker
+cp -r $PUPPET_PACEMAKER /etc/puppet/environments/production/modules/pacemaker
+find /etc/puppet/environments/production/modules/pacemaker -name '.git' | xargs rm -rf
 
 sudo -u foreman scl enable ruby193 "cd $FOREMAN_DIR; RAILS_ENV=production rake puppet:import:puppet_classes[batch]"
 
