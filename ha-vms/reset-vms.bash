@@ -5,7 +5,8 @@
 export INITIMAGE=rhel6rdo
 foreman_node='s6fore1'
 chunk='s6ha1'
-snapname=ready_for_mysql2
+#snapname=ready_for_mysql2
+snapname=wit_clu_and_mysql_rpms
 
 export VMSET="${chunk}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 

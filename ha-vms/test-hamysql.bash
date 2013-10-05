@@ -4,10 +4,13 @@ foreman_node='s6fore1.example.com'
 # NOTE: the $foreman_node will need access to the $scripts_home dir as well
 scripts_home=/mnt/vm-share/moar-cowbell-scripts/ha-vms
 chunk='s6ha1' # the common vm prefix
+snapname=wit_clu_and_mysql_rpms 
+#snapname=ready_for_mysql2
+
 
 VMSET="${chunk}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 
-$scripts_home/reset-vms.bash
+$scripts_home/reset-vms.bash # this also resets the foreman vm
 
 ssh_up_cmd="true"
 for vm in $VMSET; do
@@ -25,7 +28,7 @@ done
 
 for vm in $VMSET; do
   # notes, hosts assumed as already subscribed to rhel-6-server-rpms and rhel-6-server-optional-rpms
-  ssh root@$vm "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
+  # ssh root@$vm "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
   # save the step of manually killing puppet so as to run puppet agent by hand...
   ssh root@$vm "killall puppet; killall python" # the horror, the horror.
 done
