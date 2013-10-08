@@ -69,6 +69,10 @@ for i in 1 2 3 4; do
   sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" $DOMNAME "bash -x /mnt/vm-share/tmp/$DOMNAME-ifconfig.bash"
 done
 
+# disable nfs v4 so that mounted /var/lib/mysql works
+sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${chunk}nfs "sed -i 's/#RPCNFSDARGS=\"-N 4\"/RPCNFSDARGS=\"-N 4\"/' /etc/sysconfig/nfs"
+# install the nfs rpm so we get the mysql system (/etc/passwd) user
+sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${chunk}nfs "yum -y install mysql" 
 # create nfs mount point on the nfs server.  ready to be mounted!
 sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${chunk}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql 192.168.200.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on" 
 
