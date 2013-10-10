@@ -27,3 +27,12 @@ cp $ASTAPOR/bin/seeds.rb /var/lib/foreman/db/seeds.rb
 
 # re-run seeds.rb to get added hostgroup and host->hostgroup associations
 sudo -u foreman scl enable ruby193 "cd $FOREMAN_DIR; rake --trace db:seed RAILS_ENV=production FOREMAN_PROVISIONING=$FOREMAN_PROVISIONING"
+
+if [ $? -ne 0 ]; then
+  echo "FAILURE!"
+  echo "here is a guess of a first place to look if it is a puppet error..."
+  cmd="tail /var/log/foreman-proxy/*log"
+  echo $cmd
+  $cmd
+  exit 1
+fi
