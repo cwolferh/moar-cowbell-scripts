@@ -114,6 +114,9 @@ ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOR
 echo "waiting for the https on foreman to come up"
 wait_for_foreman 443
 
+# The installer is doing stuff after https starts up, so wait.
+# TODO: script a check whether vftool.bash is still running
+sleep 1200
 SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "You should have foreman installed!  Along with the handy snaps:"
