@@ -14,6 +14,8 @@
 # in https://github.com/cwolferh/vms-and-foreman/ .  The INITIMAGE
 # below must match the value you used.
 #
+# TODO: add a check mid-script to make sure the correct repos are set
+#
 # Set these 5 variables
 export INITIMAGE=${INITIMAGE:=rhel6rdo}
 FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
@@ -41,6 +43,11 @@ wait_for_foreman() {
     echo -n .
     sleep 2
   done
+}
+
+pause_for_investigation() {
+  echo "PAUSED.  look around, and hit a key to continue"
+  read
 }
 
 if [[ ! -f $secret_rh_registration_script  ]]; then
@@ -88,6 +95,7 @@ sed -i 's/enabled = 1/enabled = 0/g' /etc/yum.repos.d/redhat.repo
 yum-config-manager --enable rhel-6-server-rpms
 yum-config-manager --enable rhel-6-server-optional-rpms
 yum clean all
+yum repolist
 
 EOF
 
@@ -100,6 +108,7 @@ SNAPNAME=repos_configured bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
+#pause_for_investigation
 
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "yum -y update"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "yum install -y openstack-foreman-installer augeas"
@@ -108,15 +117,19 @@ SNAPNAME=just_the_rpms bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
+#pause_for_investigation
 
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "INSTALLER_DIR=$install_dir bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode >/tmp/$FOREMAN_NODE-install-log 2>&1"
 
 echo "waiting for the https on foreman to come up"
 wait_for_foreman 443
+#pause_for_investigation
 
-# The installer is doing stuff after https starts up, so wait.
-# TODO: script a check whether vftool.bash is still running
-sleep 1200
+# TODO: script-check that is safe to restart (probably by looking for
+# tail of /tmp/$FOREMAN_NODE-install-log to match known value)
+sleep 900
+#pause_for_investigation
+
 SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "You should have foreman installed!  Along with the handy snaps:"
