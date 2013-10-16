@@ -3,7 +3,7 @@
 
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 #SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
