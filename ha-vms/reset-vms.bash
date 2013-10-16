@@ -1,14 +1,14 @@
 ## assuming you have run setup-ha-vms.bash, this is the reset button.
-## make sure $snapname to revert to is correct
+## make sure $SNAPNAME to revert to is correct
 
 # set these 4 variables
 export INITIMAGE=rhel6rdo
-foreman_node='s6fore1'
-chunk='s6ha1'
-#snapname=ready_for_mysql2
-snapname=wit_clu_and_mysql_rpms
+FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
+VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
+#SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
+SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 
-export VMSET="${chunk}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
+export VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 
 which vftool.bash >/dev/null
 if [ $? -ne 0 ]; then
@@ -18,10 +18,10 @@ fi
 vftool.bash stop_guests
 
 # we want the foreman node to be online before the clients are reverted
-SNAPNAME=$snapname vftool.bash reboot_snap_revert $foreman_node
+SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
 
-test_https="nc -w1 -z $foreman_node 443"
-echo "waiting for the https on $foreman_node to come up"
+test_https="nc -w1 -z $FOREMAN_NODE 443"
+echo "waiting for the https on $FOREMAN_NODE to come up"
 sleep 10
 exit_status=1
 while [[ $exit_status -ne 0 ]] ; do
@@ -32,4 +32,4 @@ while [[ $exit_status -ne 0 ]] ; do
 done
 
 # now bring up all the others
-SNAPNAME=$snapname vftool.bash reboot_snap_revert $VMSET
+SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $VMSET

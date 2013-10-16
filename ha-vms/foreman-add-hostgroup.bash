@@ -21,6 +21,8 @@ rm -rf  /etc/puppet/environments/production/modules/pacemaker
 cp -r $PUPPET_PACEMAKER /etc/puppet/environments/production/modules/pacemaker
 find /etc/puppet/environments/production/modules/pacemaker -name '.git' | xargs rm -rf
 
+/etc/init.d/foreman-proxy restart
+
 sudo -u foreman scl enable ruby193 "cd $FOREMAN_DIR; RAILS_ENV=production rake puppet:import:puppet_classes[batch]"
 
 cp $ASTAPOR/bin/seeds.rb /var/lib/foreman/db/seeds.rb

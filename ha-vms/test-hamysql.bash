@@ -1,16 +1,16 @@
 ## revert vm's and rerun puppet-class import, seeds.rb on foreman
 
-foreman_node='s6fore1'
-# NOTE: the $foreman_node will need access to the $scripts_home dir as well
-scripts_home=/mnt/vm-share/moar-cowbell-scripts/ha-vms
-chunk='s6ha1' # the common vm prefix
-snapname=wit_clu_and_mysql_rpms
-#snapname=ready_for_mysql2
+FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
+# NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
+VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
+SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
+#SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 
 
-VMSET="${chunk}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
+VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 
-$scripts_home/reset-vms.bash # this also resets the foreman vm
+$MCS_SCRIPTS_DIR/reset-vms.bash # this also resets the foreman vm
 
 ssh_up_cmd="true"
 for vm in $VMSET; do
@@ -26,7 +26,7 @@ while [[ $exit_status -ne 0 ]] ; do
   sleep 2
 done
 
-VMSET="${chunk}c1 ${chunk}c2 ${chunk}c3"
+VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3"
 for vm in $VMSET; do
   # notes, hosts assumed as already subscribed to rhel-6-server-rpms and rhel-6-server-optional-rpms
   # ssh root@$vm "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
@@ -37,7 +37,7 @@ for vm in $VMSET; do
   #ssh root@$vm "cat /mnt/vm-share/tmp/fstab-mysql >> /etc/fstab"
 done
 
-ssh -t root@$foreman_node "bash -x $scripts_home/foreman-add-hostgroup.bash"
+ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman-add-hostgroup.bash"
 
 # this is up2date w.r.t. dan's repo already
-#ssh root@$foreman_node "git clone https://github.com/radez/puppet-pacemaker.git /etc/puppet/environments/production/modules/pacemaker"
+#ssh root@$FOREMAN_NODE "git clone https://github.com/radez/puppet-pacemaker.git /etc/puppet/environments/production/modules/pacemaker"

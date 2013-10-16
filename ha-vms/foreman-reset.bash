@@ -1,17 +1,18 @@
 ## just revert the foreman vm, and re-import puppet
+## (assumes foreman_server.sh has already been run and does not rerun it)
 
-foreman_node='s6fore1'
-# NOTE: the $foreman_node will need access to the $scripts_home dir as well
-scripts_home=/mnt/vm-share/moar-cowbell-scripts/ha-vms
-chunk='s6ha1' # the common vm prefix
-snapname=wit_clu_and_mysql_rpms
-#snapname=ready_for_mysql2
+FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
+# NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
+VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
+SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
+#SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 
 # we want the foreman node to be online before the clients are reverted
-SNAPNAME=$snapname vftool.bash reboot_snap_revert $foreman_node
+SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
 
-test_https="nc -w1 -z $foreman_node 443"
-echo "waiting for the https on $foreman_node to come up"
+test_https="nc -w1 -z $FOREMAN_NODE 443"
+echo "waiting for the https on $FOREMAN_NODE to come up"
 sleep 10
 exit_status=1
 while [[ $exit_status -ne 0 ]] ; do
@@ -21,7 +22,7 @@ while [[ $exit_status -ne 0 ]] ; do
   sleep 2
 done
 
-ssh -t root@$foreman_node "bash -x $scripts_home/foreman-add-hostgroup.bash"
+ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman-add-hostgroup.bash"
 
 # this is up2date w.r.t. dan's repo already
-#ssh root@$foreman_node "git clone https://github.com/radez/puppet-pacemaker.git /etc/puppet/environments/production/modules/pacemaker"
+#ssh root@$FOREMAN_NODE "git clone https://github.com/radez/puppet-pacemaker.git /etc/puppet/environments/production/modules/pacemaker"
