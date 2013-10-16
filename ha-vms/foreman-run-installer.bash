@@ -1,9 +1,6 @@
 # Revert foreman to a snap *before* foreman_server.sh was run.
-# Then, run foreman_server.sh from $ASTAPOR_BIN_DIR.
+# Then, run foreman_server.sh based on contents from $ASTAPOR
 #
-# Note running foreman_server.sh alters $ASTAPOR_BIN_DIR/foreman-param.json and seeds.rb
-# in a way that could lead to different behaviour if you wanted any parameters changed.
-# Hence, $CLEAN_UP_FOREMAN_PARAMS defaults to true.
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
@@ -11,10 +8,7 @@ VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 # openstack-foreman-installer and augeas installed, but
 # foreman_server.sh has not been run yet.
 FOREMAN_SNAPNAME=${FOREMAN_SNAPNAME:=just_the_rpms}
-# must be visible to foreman node! (ie, on nfs)
-#ASTAPOR_BIN_DIR=${ASTAPOR_BIN_DIR:=/mnt/vm-share/astapor/bin}
 DUMP_ASTAPOR_OUTPUT=${DUMP_ASTAPOR_OUTPUT:=true}
-#CLEAN_UP_FOREMAN_PARAMS=${CLEAN_UP_FOREMAN_PARAMS:=true}
 
 provisioning_mode=false
 
