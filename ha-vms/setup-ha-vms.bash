@@ -8,17 +8,22 @@ hanic=eth2
 # for now, cp it from /tmp to your chosen location/name, will
 # automate more in future
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh}
+SNAPNAME=${SNAPNAME:=new_foreman_cli}
 
 # 3 VM's in a mysql HA-cluster.  one VM houses nfs shared-storage.
-export VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
+export VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3 ${VMSET_CHUNK}nfs"
 
-bash -x vftool.bash create_images
-bash -x vftool.bash prep_images
-bash -x vftool.bash start_guests
-bash -x vftool.bash populate_etc_hosts
+SETUP_COMMANDS="create_images prep_images start_guests populate_etc_hosts"
+
+for setup_command in $SETUP_COMMANDS; do
+  echo "running bash -x vftool.bash $setup_command"
+  bash -x vftool.bash $setup_command
+  echo "press enter to continue"
+  read
+done
+
 bash -x vftool.bash populate_default_dns
-
-echo 'press a key when the network is back up'
+echo 'press enter when the network is back up'
 read
 
 
@@ -30,9 +35,10 @@ echo 'press a key to continue when the foreman web UI is up'
 read
 
 for domname in $VMSET; do
-  ## XXXXXXXXXXXXXXX enter ther name of your client script below
-  sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-  $domname "bash ${FOREMAN_CLIENT_SCRIPT}"
+  if [ "$domname" != "${VMSET_CHUNK}nfs" ]; then
+    sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
+    $domname "bash ${FOREMAN_CLIENT_SCRIPT}"
+  fi
 done
 
 # install augeas on nfs server (its not subscribed to foreman and
@@ -80,4 +86,4 @@ sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET
 # create nfs mount point on the nfs server.  ready to be mounted!
 sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET_CHUNK}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql 192.168.200.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on" 
 
-SNAPNAME=new_foreman_cli bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
