@@ -1,7 +1,7 @@
 mode=test
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
 export VMSET=s6singlemysql
 #bash -x /mnt/pub/rdo/ha/reset-vms.bash
 
