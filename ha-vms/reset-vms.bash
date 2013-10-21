@@ -6,6 +6,7 @@ export INITIMAGE=${INITIMAGE:=rhel6rdo}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
+FOREMAN_SNAPNAME=${SNAPNAME:=$SNAPNAME}
 
 export VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 

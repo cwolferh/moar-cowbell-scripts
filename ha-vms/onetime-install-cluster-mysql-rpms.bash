@@ -3,7 +3,7 @@
 # install, mysql and cluster rpm's for faster testing
 # and re-snap
 
-new_SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
+NEW_SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
@@ -35,4 +35,4 @@ for vm in $VMSET; do
   ssh root@$vm "yum -y install cman pacemaker mysql-server ccs MySQL-python pcs"
 done
 
-SNAPNAME=$new_SNAPNAME vftool.bash reboot_snap_take $VMSET
+SNAPNAME=$NEW_SNAPNAME vftool.bash reboot_snap_take $VMSET

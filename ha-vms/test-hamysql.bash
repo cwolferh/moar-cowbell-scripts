@@ -7,7 +7,7 @@ VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 
 
-VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
+VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3 ${VMSET_CHUNK}nfs"
 
 $MCS_SCRIPTS_DIR/reset-vms.bash # this also resets the foreman vm
 
@@ -25,7 +25,7 @@ while [[ $exit_status -ne 0 ]] ; do
   sleep 2
 done
 
-VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3"
+VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3"
 for vm in $VMSET; do
   # notes, hosts assumed as already subscribed to rhel-6-server-rpms and rhel-6-server-optional-rpms
   # ssh root@$vm "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"

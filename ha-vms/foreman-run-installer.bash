@@ -13,6 +13,10 @@ provisioning_mode=false
 
 SNAPNAME=$FOREMAN_SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
 
+# Try setting this to true if you get an error like
+# "[Errno 256] No more mirrors to try" in the installer's yum updates
+# YUM_REFRESH=${YUM_REFRESH:=false}
+
 test_ssh="nc -w1 -z $FOREMAN_NODE 22"
 echo "waiting for ssh on $FOREMAN_NODE to come up"
 sleep 10
@@ -24,13 +28,19 @@ while [[ $exit_status -ne 0 ]] ; do
   sleep 2
 done
 
+# this hack is probably not necessary most of the time
+#if [ "$YUM_REFRESH" = "true" ]; then
+#  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
+#    root@$FOREMAN_NODE "yum clean all; yum repolist"  
+#fi
+
 echo "prep foreman-server"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-    root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/prep-foreman-server.bash"
+  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t \
-    root@$FOREMAN_NODE "bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode >/tmp/$FOREMAN_NODE-install-log 2>&1"
+  root@$FOREMAN_NODE "bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode >/tmp/$FOREMAN_NODE-install-log 2>&1"
 
 if [ $DUMP_ASTAPOR_OUTPUT = "true" ]; then
   ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' root@$FOREMAN_NODE "cat /tmp/$FOREMAN_NODE-install-log"
