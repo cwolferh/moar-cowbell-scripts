@@ -3,6 +3,7 @@
 # ***Before*** running foreman_server.sh:
 #   copy $ASTAPOR to standard installer location
 #   copy puppet-pacemaker puppet modules to standard installer location
+#   set default test passwords instead of the default long random hex keys
 #
 # I prefer to do it this way rather than running foreman_server.sh
 # straight from ASTAPOR.  bin/foreman-params.json gets rewritten in
@@ -27,10 +28,20 @@ mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer
 cp -ra $ASTAPOR /usr/share/openstack-foreman-installer
 find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
 
-# The Things They Carried 
+# easy default passwords please
+perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+
+# The Things They Carried
 # (I could be talking about puppet-pacemaker, or I could be talking
 #  about a great novel, highly recommended)
-mkdir -p /etc/puppet/environments/production/modules
-rm -rf  /etc/puppet/environments/production/modules/pacemaker
-cp -r $PUPPET_PACEMAKER /etc/puppet/environments/production/modules/pacemaker
-find /etc/puppet/environments/production/modules/pacemaker -name '.git' | xargs rm -rf
+#
+mkdir -p /usr/share/packstack/modules
+rm -rf  /usr/share/packstack/modules/pacemaker
+cp -r $PUPPET_PACEMAKER /usr/share/packstack/modules/pacemaker
+find /usr/share/packstack/modules/pacemaker -name '.git' | xargs rm -rf
+# below worked *before* pacemaker was added to packstack-modules-puppet
+#mkdir -p /etc/puppet/environments/production/modules
+#rm -rf  /etc/puppet/environments/production/modules/pacemaker
+#cp -r $PUPPET_PACEMAKER /etc/puppet/environments/production/modules/pacemaker
+#find /etc/puppet/environments/production/modules/pacemaker -name '.git' | xargs rm -rf
