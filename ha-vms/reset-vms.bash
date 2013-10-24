@@ -8,6 +8,7 @@ VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 FOREMAN_SNAPNAME=${SNAPNAME:=$SNAPNAME}
 
+allnodes="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs $FOREMAN_NODE"
 export VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 
 which vftool.bash >/dev/null
@@ -15,10 +16,10 @@ if [ $? -ne 0 ]; then
   echo 'vftool.bash must be in your PATH' && exit 1
 fi
 
-vftool.bash stop_guests
+VMSET="$allnodes" vftool.bash stop_guests
 
 # we want the foreman node to be online before the clients are reverted
-SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
+SNAPNAME=$FOREMAN_SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
 
 test_https="nc -w1 -z $FOREMAN_NODE 443"
 echo "waiting for the https on $FOREMAN_NODE to come up"
