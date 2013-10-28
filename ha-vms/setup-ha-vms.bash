@@ -5,11 +5,13 @@ VMSET_CHUNK=${VMSET_CHUNK:=s14ha2}
 # nic for the 192.168.200.0 network that mysql lives on
 hanic=eth2
 
+## TODO -- use ../foreman/new-foreman-clients.bash for basic setup
+
 # you may want to hold off on foreman_client.sh registration for later
 # (especially if you are going to be in the habit of reverting
 #  foreman to a pre-foreman_server.sh state as part of testing),
 # in which case set this to true
-SKIP_FOREMAN_CLIENT_REGISTRATION={$SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
+SKIP_FOREMAN_CLIENT_REGISTRATION=${SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
 
 # This client script must exist (if above var is true) before running
 # this script.  For now, cp it from /tmp on your foreman server to
