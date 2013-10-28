@@ -2,7 +2,7 @@
 # Then, run foreman_server.sh based on contents from $ASTAPOR
 #
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 # The name of the snap with the assumption that this snap has the rpms
 # openstack-foreman-installer and augeas installed, but
 # foreman_server.sh has not been run yet.
@@ -36,7 +36,7 @@ done
 
 echo "prep foreman-server"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/prep-foreman-server.bash"
+  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/ha-vms/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t \

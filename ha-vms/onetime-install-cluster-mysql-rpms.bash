@@ -6,12 +6,12 @@
 NEW_SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 
 VMSET="${VMSET_CHUNK}c1 ${chunk}c2 ${chunk}c3 ${chunk}nfs"
 
-$MCS_SCRIPTS_DIR/reset-vms.bash
+$MCS_SCRIPTS_DIR/ha-vms/reset-vms.bash
 
 ssh_up_cmd="true"
 for vm in $VMSET; do

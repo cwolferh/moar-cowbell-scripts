@@ -4,7 +4,7 @@
 
 export FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
-export MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
+export MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 # snapnames we revert all other guests too (should be pre-foreman-cli
 # registration)
@@ -24,7 +24,7 @@ pause_for_investigation() {
 }
 
 echo "reverting foreman node: $FOREMAN_NODE"
-bash -x $MCS_SCRIPTS_DIR/foreman-run-installer.bash
+bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-run-installer.bash
 pause_for_investigation
 
 

@@ -32,6 +32,19 @@ find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
 perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 
+yum -y install http://kojipkgs.fedoraproject.org/packages/openstack-puppet-modules/2013.2/4.el6/noarch/openstack-puppet-modules-2013.2-4.el6.noarch.rpm
+rpm -e --nodeps packstack-modules-puppet
+
+mkdir -p /usr/share/openstack-puppet/modules
+rm -rf  /usr/share/openstack-puppet/modules/pacemaker
+cp -r $PUPPET_PACEMAKER /usr/share/openstack-puppet/modules/pacemaker
+find /usr/share/openstack-puppet/modules/pacemaker -name '.git' | xargs rm -rf
+
+exit 0
+
+
+
+
 # The Things They Carried
 # (I could be talking about puppet-pacemaker, or I could be talking
 #  about a great novel, highly recommended)

@@ -3,7 +3,7 @@
 
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha1}
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 #SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
@@ -22,7 +22,7 @@ while [[ $exit_status -ne 0 ]] ; do
   sleep 2
 done
 
-ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman-add-hostgroup.bash"
+ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-add-hostgroup.bash"
 
 # this is up2date w.r.t. dan's repo already
 #ssh root@$FOREMAN_NODE "git clone https://github.com/radez/puppet-pacemaker.git /etc/puppet/environments/production/modules/pacemaker"

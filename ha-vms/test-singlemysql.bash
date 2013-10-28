@@ -1,7 +1,7 @@
 mode=test
 SNAPNAME=${SNAPNAME:=wit_clu_and_mysql_rpms}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
-MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs/ha-vms}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 export VMSET=s6singlemysql
 #bash -x /mnt/pub/rdo/ha/reset-vms.bash
 
@@ -65,7 +65,7 @@ if [ "$mode" = "test" ]; then
 
   SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $VMSET
 
-  ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman-add-hostgroup.bash"
+  ssh -t root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-add-hostgroup.bash"
   
   ssh_up_cmd="true"
   for vm in $VMSET; do
