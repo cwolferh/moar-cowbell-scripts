@@ -2,8 +2,9 @@
 export INITIMAGE=${INITIMAGE:=rhel6rdo}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 VMSET_CHUNK=${VMSET_CHUNK:=s14ha2}
-# nic for the 192.168.200.0 network that mysql lives on
-hanic=eth2
+CLUSUBNET=${CLUSUBNET:=192.168.203}
+# nic for the CLUSUBNET network that mysql lives on
+HANIC=${HANIC:=eth3}
 
 ## TODO -- use ../foreman/new-foreman-clients.bash for basic setup
 
@@ -104,8 +105,8 @@ fi
 
 # populating dns restarts the network, so need to restart the foreman server
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-  bash -x vftool.bash destroy_if_running $FOREMAN_NODE
-  sudo virsh start $FOREMAN_NODE
+  VMSET=$FOREMAN_NODE bash -x vftool.bash stop_guests
+  VMSET=$FOREMAN_NODE bash -x vftool.bash start_guests
 
   if [ "$UNATTENDED" = "false" ]; then
     echo 'press a key to continue when the foreman web UI is up'
@@ -176,30 +177,30 @@ fi
 mkdir -p /mnt/vm-share/tmp
 for i in 1 2 3 4; do
   DOMNAME=${VMSET_CHUNK}c$i
-  IPADDR=192.168.200.1$i
+  IPADDR=$CLUSUBNET.1$i
   if [ "$DOMNAME" = "${VMSET_CHUNK}c4" ]; then
      DOMNAME=${VMSET_CHUNK}nfs
-     IPADDR=192.168.200.200
+     IPADDR=$CLUSUBNET.200
   fi
 
   cat > /mnt/vm-share/tmp/$DOMNAME-ifconfig.bash <<EOCAT
 
 augtool <<EOA
-set /files/etc/sysconfig/network-scripts/ifcfg-$hanic/BOOTPROTO none
-set /files/etc/sysconfig/network-scripts/ifcfg-$hanic/IPADDR    $IPADDR
-set /files/etc/sysconfig/network-scripts/ifcfg-$hanic/NETMASK   255.255.255.0
-set /files/etc/sysconfig/network-scripts/ifcfg-$hanic/NM_CONTROLLED no
-set /files/etc/sysconfig/network-scripts/ifcfg-$hanic/ONBOOT    yes
+set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/BOOTPROTO none
+set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/IPADDR    $IPADDR
+set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/NETMASK   255.255.255.0
+set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/NM_CONTROLLED no
+set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/ONBOOT    yes
 save
 EOA
 
-ifup eth2
+ifup $HANIC
 EOCAT
 done
 
 for i in 1 2 3 4; do
   DOMNAME=${VMSET_CHUNK}c$i
-  IPADDR=192.168.200.1$i
+  IPADDR=$CLUSUBNET.1$i
   if [ "$DOMNAME" = "${VMSET_CHUNK}c4" ]; then
      DOMNAME=${VMSET_CHUNK}nfs
   fi
@@ -212,6 +213,6 @@ sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET
 # install the nfs rpm so we get the mysql system (/etc/passwd) user
 sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET_CHUNK}nfs "yum -y install mysql"
 # create nfs mount point on the nfs server.  ready to be mounted!
-sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET_CHUNK}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql 192.168.200.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on"
+sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VMSET_CHUNK}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on"
 
 SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
