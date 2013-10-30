@@ -13,6 +13,9 @@ export SNAPNAME=${SNAPNAME:=new_foreman_cli}
 export FOREMAN_SNAPNAME=${FOREMAN_SNAPNAME:=just_the_rpms}
 UNATTENDED=${UNATTENDED:=false}
 
+# may want to do this if ha hosts not yet subscribed to a running
+# foreman install
+SKIP_FOREMAN_RUN_INSTALLER=${SKIP_FOREMAN_RUN_INSTALLER:=false}
 SKIP_FOREMAN_CLIENT_REGISTRATION=${SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh}
 
@@ -23,10 +26,11 @@ pause_for_investigation() {
   fi
 }
 
-echo "reverting foreman node: $FOREMAN_NODE"
-bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-run-installer.bash
-pause_for_investigation
-
+if [ "$SKIP_FOREMAN_RUN_INSTALLER" != "true" ]; then
+  echo "reverting foreman node: $FOREMAN_NODE"
+  bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-run-installer.bash
+  pause_for_investigation
+fi
 
 VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3 ${VMSET_CHUNK}nfs" 
 echo "reverting all other nodes: $VMSET"
@@ -35,13 +39,12 @@ pause_for_investigation
 
 echo "waiting for the https on foreman to come up"
 est_https="nc -w1 -z $FOREMAN_NODE 443"
-sleep 10
 exit_status=1
 while [[ $exit_status -ne 0 ]] ; do
   eval $test_https > /dev/null
   exit_status=$?
   echo -n .
-  sleep 2
+  sleep 6
 done
 
 ssh_up_cmd="true"
@@ -62,7 +65,7 @@ if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
   for vm in $VMSET; do
     #  hosts assumed as already subscribed to rhel-6-server-rpms
     # and rhel-6-server-optional-rpms
-    #ssh root@$vm -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
+    #ssh root@$vm  -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
     #  "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
   
     ssh root@$vm -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
@@ -74,6 +77,7 @@ if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
 
   for vm in $VMSET; do
     # save the step of manually killing puppet so as to run puppet agent by hand...
-    ssh root@$vm "killall puppet; killall python" # the horror, the horror.
+    ssh root@$vm -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
+      "killall puppet; killall python" # the horror, the horror.
   done  
 fi
