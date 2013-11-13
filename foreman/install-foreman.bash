@@ -19,9 +19,13 @@
 # Set these 5 variables
 export INITIMAGE=${INITIMAGE:=rhel6rdo}
 FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
+UNATTENDED=${UNATTENDED:=false}
 provisioning_mode=false
+
+configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=true}
+
 # must be visible to $FOREMAN_NODE, so under /mnt/vm-share
-secret_rh_registration_script=/mnt/vm-share/tmp/just-subscribe.sh
+secret_rh_registration_script=${REG_SCRIPT:=/mnt/vm-share/tmp/just-subscribe.sh}
 # install dir that the FOREMAN_NODE will run the installer from
 # (to use the version shipped with the rpm, this would be
 #  /usr/share/openstack-foreman-installer/bin)
@@ -46,8 +50,10 @@ wait_for_foreman() {
 }
 
 pause_for_investigation() {
-  echo "PAUSED.  look around, and hit a key to continue"
-  read
+  if [ "$UNATTENDED" != "true" ]; then
+    echo "PAUSED.  look around, and hit a key to continue"
+    read
+  fi
 }
 
 if [[ ! -f $secret_rh_registration_script  ]]; then
@@ -90,7 +96,8 @@ if [[ ! -e /mnt/vm-share/tmp ]]; then
   exit 1
 fi
 
-cat >/mnt/vm-share/tmp/set-rh-repos.bash <<EOF
+if [ "$configure_repos_for_rdo" = "true" ]; then
+  cat >/mnt/vm-share/tmp/set-rh-repos.bash <<EOF
 sed -i 's/enabled = 1/enabled = 0/g' /etc/yum.repos.d/redhat.repo
 yum-config-manager --enable rhel-6-server-rpms
 yum-config-manager --enable rhel-6-server-optional-rpms
@@ -99,12 +106,13 @@ yum repolist
 
 EOF
 
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "bash /mnt/vm-share/tmp/set-rh-repos.bash"
-
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q epel-release || yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm"
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q rdo-release-havana-6 || yum install http://repos.fedorapeople.org/repos/openstack/openstack-havana/rdo-release-havana-6.noarch.rpm"
-
-SNAPNAME=repos_configured bash vftool.bash reboot_snap_take $FOREMAN_NODE
+  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "bash /mnt/vm-share/tmp/set-rh-repos.bash"
+  
+  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q epel-release || yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm"
+  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q rdo-release-havana-6 || yum install http://repos.fedorapeople.org/repos/openstack/openstack-havana/rdo-release-havana-6.noarch.rpm"
+  
+  SNAPNAME=repos_configured bash vftool.bash reboot_snap_take $FOREMAN_NODE
+fi
 
 echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
