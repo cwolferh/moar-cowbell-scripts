@@ -39,7 +39,7 @@ SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_revert $VMSET
 pause_for_investigation
 
 echo "waiting for the https on foreman to come up"
-est_https="nc -w1 -z $FOREMAN_NODE 443"
+test_https="nc -w1 -z $FOREMAN_NODE 443"
 exit_status=1
 while [[ $exit_status -ne 0 ]] ; do
   eval $test_https > /dev/null
