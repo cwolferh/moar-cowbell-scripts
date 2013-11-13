@@ -16,6 +16,7 @@
 
 ASTAPOR=${ASTAPOR:=/mnt/vm-share/astapor}
 PUPPET_PACEMAKER=${PUPPET_PACEMAKER:=/mnt/vm-share/puppet-pacemaker}
+PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
 if [ -d /etc/puppet/environments/production/modules ]; then
   echo 'WARNING: /etc/puppet/environments/production/modules ALREADY EXISTS.'
@@ -51,6 +52,15 @@ mkdir -p /usr/share/packstack/modules
 rm -rf  /usr/share/packstack/modules/pacemaker
 cp -r $PUPPET_PACEMAKER /usr/share/packstack/modules/pacemaker
 find /usr/share/packstack/modules/pacemaker -name '.git' | xargs rm -rf
+
+# gluster
+mkdir -p /usr/share/packstack/modules
+rm -rf  /usr/share/packstack/modules/gluster
+cp -r $PUPPET_GLUSTER /usr/share/packstack/modules/gluster
+find /usr/share/packstack/modules/gluster -name '.git' | xargs rm -rf
+
+
+
 # below worked *before* pacemaker was added to packstack-modules-puppet
 #mkdir -p /etc/puppet/environments/production/modules
 #rm -rf  /etc/puppet/environments/production/modules/pacemaker
