@@ -1,6 +1,7 @@
 ## revert foreman to state before foreman_server.sh is run
 ## revert other hosts as well
 
+# TODO: replace with a wrapper of ../foreman/revert-foreman-and-clis.bash
 
 export FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
 # NOTE: the $FOREMAN_NODE will need access to the $MCS_SCRIPTS_DIR dir as well
