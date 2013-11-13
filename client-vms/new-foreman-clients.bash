@@ -13,7 +13,9 @@ SKIP_FOREMAN_CLIENT_REGISTRATION=${SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
 # this script.  For now, cp it from /tmp on your foreman server to
 # your chosen location/name, will automate more in future
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh}
+SKIPSNAP=${SKIPSNAP:=false}
 SNAPNAME=${SNAPNAME:=new_foreman_cli}
+
 
 # if false, wait for user input to continue after key steps.
 UNATTENDED=${UNATTENDED:=false}
@@ -159,4 +161,6 @@ if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
   done
 fi
 
-SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+if [ "$SKIPSNAP" != "true" ]; then
+  SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+fi
