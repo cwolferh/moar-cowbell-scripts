@@ -36,7 +36,7 @@ done
 
 echo "prep foreman-server"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/ha-vms/prep-foreman-server.bash"
+  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t \

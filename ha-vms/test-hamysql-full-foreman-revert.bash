@@ -29,7 +29,7 @@ pause_for_investigation() {
 
 if [ "$SKIP_FOREMAN_RUN_INSTALLER" != "true" ]; then
   echo "reverting foreman node: $FOREMAN_NODE"
-  bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-run-installer.bash
+  bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
   pause_for_investigation
 fi
 

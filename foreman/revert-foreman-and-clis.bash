@@ -32,7 +32,7 @@ pause_for_investigation() {
 
 if [ "$SKIP_FOREMAN_RUN_INSTALLER" != "true" ]; then
   echo "reverting foreman node: $FOREMAN_NODE"
-  bash -x $MCS_SCRIPTS_DIR/ha-vms/foreman-run-installer.bash
+  bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
   pause_for_investigation
 fi
 
@@ -42,28 +42,11 @@ echo "reverting all other nodes: $VMSET"
 SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_revert $VMSET
 pause_for_investigation
 
-echo "waiting for the https on foreman to come up"
-est_https="nc -w1 -z $FOREMAN_NODE 443"
-exit_status=1
-while [[ $exit_status -ne 0 ]] ; do
-  eval $test_https > /dev/null
-  exit_status=$?
-  echo -n .
-  sleep 6
-done
+echo "waiting for hosts to boot"
+VMSET="$VMSET_TO_REVERT" vftool.bash wait_for_port 22
+echo "waiting for webserver on $FOREMAN_NODE to come up"
+VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
 
-ssh_up_cmd="true"
-for vm in $VMSET; do
-  ssh_up_cmd="$ssh_up_cmd && nc -w1 -z $vm 22"
-done
-echo "waiting for the sshd on hosts { $VMSET } to come up"
-exit_status=1
-while [[ $exit_status -ne 0 ]] ; do
-  eval $ssh_up_cmd > /dev/null
-  exit_status=$?
-  sleep 6
-  echo -n .
-done
 
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
   #VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3"
