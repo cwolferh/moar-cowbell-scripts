@@ -25,7 +25,7 @@ if [ -d /etc/puppet/environments/production/modules ]; then
 fi
 
 ## temporary workaround
-yum -y install /mnt/vm-share/tmp/packstack-modules-puppet-2013.2.1-0.10.dev846.el6ost.noarch.rpm 
+#yum -y install /mnt/vm-share/tmp/packstack-modules-puppet-2013.2.1-0.10.dev846.el6ost.noarch.rpm 
 
 mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
 
