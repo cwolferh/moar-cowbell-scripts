@@ -135,7 +135,7 @@ wait_for_foreman 443
 
 # TODO: script-check that is safe to restart (probably by looking for
 # tail of /tmp/$FOREMAN_NODE-install-log to match known value)
-sleep 900
+#sleep 900
 #pause_for_investigation
 
 SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
