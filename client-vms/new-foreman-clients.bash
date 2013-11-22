@@ -89,6 +89,7 @@ fi
 
 # restarting the network means need to restart the guests (tragically)
 bash -x vftool.bash stop_guests
+
 if [ "$UNATTENDED" = "false" ]; then
   echo 'press enter when the guests have stopped'
   read
@@ -99,19 +100,8 @@ fi
 bash -x vftool.bash first_snaps
 bash -x vftool.bash start_guests
 
-ssh_up_cmd="true"
-for vm in $VMSET; do
-  ssh_up_cmd="$ssh_up_cmd && nc -w1 -z $vm 22"
-done
-echo "waiting for the sshd on hosts { $VMSET } to come up"
-sleep 15
-exit_status=1
-while [[ $exit_status -ne 0 ]] ; do
-  eval $ssh_up_cmd > /dev/null
-  exit_status=$?
-  sleep 6
-  echo -n .
-done
+vftool.bash wait_for_port 22
+
 if [ "$UNATTENDED" = "false" ]; then
   echo 'verify the hosts are up and reachable by ssh'
   read
@@ -134,23 +124,14 @@ done
 
 # populating dns restarts the network, so need to restart the foreman server
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-  bash -x vftool.bash destroy_if_running $FOREMAN_NODE
+  bash vftool.bash destroy_if_running $FOREMAN_NODE
   sudo virsh start $FOREMAN_NODE
 
   if [ "$UNATTENDED" = "false" ]; then
     echo 'press a key to continue when the foreman web UI is up'
     read
   else
-    test_https="nc -w1 -z $FOREMAN_NODE 443"
-    echo "waiting for https on $FOREMAN_NODE to come up"
-    sleep 10
-    exit_status=1
-    while [[ $exit_status -ne 0 ]] ; do
-      eval $test_https > /dev/null
-      exit_status=$?
-      sleep 6
-      echo -n .
-    done
+    VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
   fi
 
   for domname in $VMSET; do
