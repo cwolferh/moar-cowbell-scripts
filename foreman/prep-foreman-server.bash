@@ -14,27 +14,31 @@
 # you git revert) on the fresh system.
 #
 
+JUST_SEEDS=${JUST_SEEDS:=false}
+FROM_SOURCE=${FROM_SOURCE:=true}
 ASTAPOR=${ASTAPOR:=/mnt/vm-share/astapor}
 PUPPET_PACEMAKER=${PUPPET_PACEMAKER:=/mnt/vm-share/puppet-pacemaker}
 PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
-if [ -d /etc/puppet/environments/production/modules ]; then
-  echo 'WARNING: /etc/puppet/environments/production/modules ALREADY EXISTS.'
-  echo 'THIS MAY NOT BE A PRE-foreman_server.sh-RUN SERVER'
-  echo 'CONTINUING ANYWAY'
-fi
-
-## temporary workaround
-#yum -y install /mnt/vm-share/tmp/packstack-modules-puppet-2013.2.1-0.10.dev846.el6ost.noarch.rpm 
-
-mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
-
-cp -ra $ASTAPOR /usr/share/openstack-foreman-installer
-find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
+# work around for https://bugzilla.redhat.com/show_bug.cgi?id=1031167
+sed -i 's/private/#private/g' /usr/share/packstack/modules/vswitch/lib/puppet/provider/vs_port/ovs_redhat.rb
 
 # easy default passwords please
 perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
+if [ "$JUST_SEEDS" = "true" ]; then
+  exit 0
+fi
+
+## temporary workaround
+#yum -y install /mnt/vm-share/tmp/packstack-modules-puppet-2013.2.1-0.10.dev846.el6ost.noarch.rpm
+
+if [ "$FROM_SOURCE" = "true" ]; then
+  mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
+  cp -ra $ASTAPOR /usr/share/openstack-foreman-installer
+  find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
+fi
+
 
 # testing openstack-puppet-modules
 #yum -y install http://kojipkgs.fedoraproject.org/packages/openstack-puppet-modules/2013.2/4.el6/noarch/openstack-puppet-modules-2013.2-4.el6.noarch.rpm
@@ -51,16 +55,16 @@ perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
 # (I could be talking about puppet-pacemaker, or I could be talking
 #  about a great novel, highly recommended)
 #
-mkdir -p /usr/share/packstack/modules
-rm -rf  /usr/share/packstack/modules/pacemaker
-cp -r $PUPPET_PACEMAKER /usr/share/packstack/modules/pacemaker
-find /usr/share/packstack/modules/pacemaker -name '.git' | xargs rm -rf
-
-# gluster
-mkdir -p /usr/share/packstack/modules
-rm -rf  /usr/share/packstack/modules/gluster
-cp -r $PUPPET_GLUSTER /usr/share/packstack/modules/gluster
-find /usr/share/packstack/modules/gluster -name '.git' | xargs rm -rf
+#mkdir -p /usr/share/packstack/modules
+#rm -rf  /usr/share/packstack/modules/pacemaker
+#cp -r $PUPPET_PACEMAKER /usr/share/packstack/modules/pacemaker
+#find /usr/share/packstack/modules/pacemaker -name '.git' | xargs rm -rf
+#
+## gluster
+#mkdir -p /usr/share/packstack/modules
+#rm -rf  /usr/share/packstack/modules/gluster
+#cp -r $PUPPET_GLUSTER /usr/share/packstack/modules/gluster
+#find /usr/share/packstack/modules/gluster -name '.git' | xargs rm -rf
 
 
 

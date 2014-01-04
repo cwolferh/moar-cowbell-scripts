@@ -8,10 +8,14 @@ MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 # foreman_server.sh has not been run yet.
 FOREMAN_SNAPNAME=${FOREMAN_SNAPNAME:=just_the_rpms}
 DUMP_ASTAPOR_OUTPUT=${DUMP_ASTAPOR_OUTPUT:=true}
+FROM_SOURCE=${FROM_SOURCE:=true}
+REVERT_FROM_SNAP=${REVERT_FROM_SNAP:=true}
 
 provisioning_mode=false
 
-SNAPNAME=$FOREMAN_SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
+if [ "$REVERT_FROM_SNAP" = "true" ]; then
+  SNAPNAME=$FOREMAN_SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
+fi
 
 # Try setting this to true if you get an error like
 # "[Errno 256] No more mirrors to try" in the installer's yum updates
@@ -31,12 +35,12 @@ done
 # this hack is probably not necessary most of the time
 #if [ "$YUM_REFRESH" = "true" ]; then
 #  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-#    root@$FOREMAN_NODE "yum clean all; yum repolist"  
+#    root@$FOREMAN_NODE "yum clean all; yum repolist"
 #fi
 
 echo "prep foreman-server"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-  root@$FOREMAN_NODE "bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
+  root@$FOREMAN_NODE "FROM_SOURCE=${FROM_SOURCE} bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t \

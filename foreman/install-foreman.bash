@@ -18,18 +18,22 @@
 #
 # Set these 5 variables
 export INITIMAGE=${INITIMAGE:=rhel6rdo}
-FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
+export FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
 UNATTENDED=${UNATTENDED:=false}
-provisioning_mode=false
+export FROM_SOURCE=${FROM_SOURCE:=true}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
-configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=true}
+provisioning_mode=false
+client_script_location=/mnt/vm-share/rdo/foreman_client_${FOREMAN_NODE}.sh
+
+configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=false}
 
 # must be visible to $FOREMAN_NODE, so under /mnt/vm-share
 secret_rh_registration_script=${REG_SCRIPT:=/mnt/vm-share/tmp/just-subscribe.sh}
 # install dir that the FOREMAN_NODE will run the installer from
 # (to use the version shipped with the rpm, this would be
 #  /usr/share/openstack-foreman-installer/bin)
-install_dir=/mnt/vm-share/astapor/bin
+# install_dir=${INSTALLER_DIR:=/mnt/vm-share/astapor/bin}
 
 # set VMSET for vftool.bash
 export VMSET="$FOREMAN_NODE"
@@ -58,6 +62,11 @@ pause_for_investigation() {
 
 if [[ ! -f $secret_rh_registration_script  ]]; then
   echo 'you must set $secret_rh_registration_script (to register with subscription-manager)'
+  exit 1
+fi
+if [[ ! -f "$MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash" ]]; then
+  echo '$MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash does not exist'
+  echo 'verify $MCS_SCRIPTS_DIR (currently set to ' $MCS_SCRIPTS_DIR ')'
   exit 1
 fi
 if [[ ! -f vftool.bash  ]]; then
@@ -107,12 +116,12 @@ yum repolist
 EOF
 
   ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "bash /mnt/vm-share/tmp/set-rh-repos.bash"
-  
-  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q epel-release || yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm"
+
+  ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q epel-release || yum -y install http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
   ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q rdo-release-havana-6 || yum install http://repos.fedorapeople.org/repos/openstack/openstack-havana/rdo-release-havana-6.noarch.rpm"
-  
-  SNAPNAME=repos_configured bash vftool.bash reboot_snap_take $FOREMAN_NODE
 fi
+
+SNAPNAME=pre_foreman_rpms bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
@@ -127,7 +136,10 @@ echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
 #pause_for_investigation
 
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "INSTALLER_DIR=$install_dir bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode >/tmp/$FOREMAN_NODE-install-log 2>&1"
+echo "installing foreman"
+REVERT_FROM_SNAP=false \
+  bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
+#ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "INSTALLER_DIR=$install_dir bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode 2>&1 | tee -a /tmp/$FOREMAN_NODE-install-log"
 
 echo "waiting for the https on foreman to come up"
 wait_for_foreman 443
@@ -137,6 +149,13 @@ wait_for_foreman 443
 # tail of /tmp/$FOREMAN_NODE-install-log to match known value)
 #sleep 900
 #pause_for_investigation
+
+# copy the client registration script somewhere handy
+VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $client_script_location"
+
+
+echo "Foreman is up!  Hit ctrl-c to leave it up, or enter to take another snapshot now"
+read
 
 SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
 
