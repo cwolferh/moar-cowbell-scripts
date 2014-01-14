@@ -1,7 +1,19 @@
+usage(){
+  echo "Usage: "
+  echo "   VMSET_CHUNK=uniqueClientChunk new-foreman-clients.bash N"
+  echo "     (where N is number of new clients to register to foreman)"
+  echo
+  echo "  or just"
+  echo
+  echo "    VMSET='myclientfoo myclientbar' new-foreman-clients.bash"
+  exit 1
+}
+
 # set these 5 variables
 export INITIMAGE=${INITIMAGE:=rhel6rdo}
 FOREMAN_NODE=${FOREMAN_NODE:=s14fore1}
-VMSET_CHUNK=${VMSET_CHUNK:=s14ha2}
+
+#VMSET_CHUNK=${VMSET_CHUNK:=s14ha2}
 
 # you may want to hold off on foreman_client.sh registration for later
 # (especially if you are going to be in the habit of reverting
@@ -25,26 +37,29 @@ UNATTENDED=${UNATTENDED:=false}
 # blank.
 SCRIPT_HOOK_REGISTRATION=${SCRIPT_HOOK_REGISTRATION:=''}
 
-usage(){
-  echo "VMSET_CHUNK=uniqueClientChunk new-foreman-clients.bash N"
-  echo "  where N is number of new clients to register to foreman"
-  exit 1
-}
+if [ "x$VMSET" = "x" -a "x${VMSET_CHUNK}" = "x" ]; then
+  echo 'You must define $VMSET or $VMSET_CHUNK'; usage
+fi
+if [ "x$VMSET" != "x" -a "x${VMSET_CHUNK}" != "x" ]; then
+  echo 'You must not define both $VMSET and $VMSET_CHUNK'; usage
+fi
 
-[[ "$#" -ne 1 ]] && usage
+[ "x${VMSET_CHUNK}" != "x" -a "$#" -ne 1 ] && usage
 
-numclis=$1
-
-vmset="${VMSET_CHUNK}1"
-
-i=2
-while [ $i -le $numclis ]; do
-  vm="$VMSET_CHUNK$i"
-  vmset="$vmset $vm"
-  i=$[$i+1]
-done
-
-export VMSET=$vmset
+if [ "x${VMSET_CHUNK}" != "x" ]; then
+  numclis=$1
+  
+  vmset="${VMSET_CHUNK}1"
+  
+  i=2
+  while [ $i -le $numclis ]; do
+    vm="$VMSET_CHUNK$i"
+    vmset="$vmset $vm"
+    i=$[$i+1]
+  done
+  
+  export VMSET=$vmset
+fi
 
 for vm in $VMSET; do
   sudo virsh domstate $vm >/dev/null 2>&1
@@ -143,5 +158,9 @@ if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
 fi
 
 if [ "$SKIPSNAP" != "true" ]; then
-  SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+  if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
+    SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+  else
+    SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET
+  fi
 fi

@@ -23,13 +23,6 @@ PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 # work around for https://bugzilla.redhat.com/show_bug.cgi?id=1031167
 sed -i 's/private/#private/g' /usr/share/packstack/modules/vswitch/lib/puppet/provider/vs_port/ovs_redhat.rb
 
-# easy default passwords please
-perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
-  /usr/share/openstack-foreman-installer/bin/seeds.rb
-if [ "$JUST_SEEDS" = "true" ]; then
-  exit 0
-fi
-
 ## temporary workaround
 #yum -y install /mnt/vm-share/tmp/packstack-modules-puppet-2013.2.1-0.10.dev846.el6ost.noarch.rpm
 
@@ -38,6 +31,17 @@ if [ "$FROM_SOURCE" = "true" ]; then
   cp -ra $ASTAPOR /usr/share/openstack-foreman-installer
   find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
 fi
+
+# easy default passwords please
+perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+if [ "$JUST_SEEDS" = "true" ]; then
+  exit 0
+fi
+perl -p -i -e 's/172.16.0.1/192.168.200.10/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/172.16.1.1/192.168.201.10/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
 
 
 # testing openstack-puppet-modules
