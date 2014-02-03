@@ -35,13 +35,13 @@ fi
 # easy default passwords please
 perl -p -i -e "s/SecureRandom\.hex/'weakpw'/g" \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/172.16.0.1/192.168.200.10/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/172.16.1.1/192.168.200.10/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
 if [ "$JUST_SEEDS" = "true" ]; then
   exit 0
 fi
-perl -p -i -e 's/172.16.0.1/192.168.200.10/g' \
-  /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/172.16.1.1/192.168.201.10/g' \
-  /usr/share/openstack-foreman-installer/bin/seeds.rb
 
 
 # testing openstack-puppet-modules

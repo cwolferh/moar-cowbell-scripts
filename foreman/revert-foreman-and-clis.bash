@@ -11,6 +11,7 @@ export MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 export SNAPNAME=${SNAPNAME:=new_foreman_cli}
 # snapname we revert to where we re-run foreman_server.sh
 export FOREMAN_SNAPNAME=${FOREMAN_SNAPNAME:=just_the_rpms}
+export FROM_SOURCE=${FROM_SOURCE:=true}
 UNATTENDED=${UNATTENDED:=false}
 export VMSET_TO_REVERT=${VMSET_TO_REVERT:="gluc1 gluc2"}
 # below might be a subset of above if a vm does not need to register
@@ -39,7 +40,7 @@ fi
 #VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3 ${VMSET_CHUNK}nfs" 
 VMSET=$VMSET_TO_REVERT
 echo "reverting all other nodes: $VMSET"
-SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_revert $VMSET
+SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_revert $VMSET
 pause_for_investigation
 
 echo "waiting for hosts to boot"
@@ -50,23 +51,6 @@ VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
 
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
   #VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3"
-  VMSET=$VMSET_TO_REGISTER
-  for vm in $VMSET; do
-    #  hosts assumed as already subscribed to rhel-6-server-rpms
-    # and rhel-6-server-optional-rpms
-    #ssh root@$vm  -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-    #  "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
-  
-    ssh root@$vm -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-     "bash ${FOREMAN_CLIENT_SCRIPT} &" 
-
-    # pcs management of shared storage is going to use its own nfs mount options, so no point in below line
-    #ssh root@$vm "cat /mnt/vm-share/tmp/fstab-mysql >> /etc/fstab"
-  done
-
-  for vm in $VMSET; do
-    # save the step of manually killing puppet so as to run puppet agent by hand...
-    ssh root@$vm -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-      "killall puppet; killall python" # the horror, the horror.
-  done  
+  VMSET=$VMSET_TO_REGISTER vftool.bash run \
+     "bash ${FOREMAN_CLIENT_SCRIPT} && /etc/init.d/puppet stop &" 
 fi
