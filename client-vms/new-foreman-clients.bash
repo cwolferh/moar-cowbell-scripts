@@ -35,7 +35,7 @@ UNATTENDED=${UNATTENDED:=false}
 # if you want to run a script that registers and configures your rhel
 # repos, this is the place to reference that script.  otherwise, leave
 # blank.
-SCRIPT_HOOK_REGISTRATION=${SCRIPT_HOOK_REGISTRATION:=''}
+REG_SCRIPT=${REG_SCRIPT:=''}
 
 if [ "x$VMSET" = "x" -a "x${VMSET_CHUNK}" = "x" ]; then
   echo 'You must define $VMSET or $VMSET_CHUNK'; usage
@@ -122,25 +122,17 @@ if [ "$UNATTENDED" = "false" ]; then
   read
 fi
 
-if [ "x$SCRIPT_HOOK_REGISTRATION" != "x" ]; then
-  for domname in $VMSET; do
-    echo "running SCRIPT_HOOK_REGISTRATION"
-    sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-      $domname "bash ${SCRIPT_HOOK_REGISTRATION}"
-  done
+if [ "x$REG_SCRIPT" != "x" ]; then
+  bash -x vftool.bash run "bash ${REG_SCRIPT}"
 fi
 
-# chances are we will want augeas
-for domname in $VMSET; do
-   ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-    root@$domname "yum -y install augeas puppet"
-done
-
+# chances are we will want augeas and puppet
+bash -x vftool.bash run "yum -y install augeas puppet"
 
 # populating dns restarts the network, so need to restart the foreman server
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-  bash vftool.bash destroy_if_running $FOREMAN_NODE
-  sudo virsh start $FOREMAN_NODE
+  bash vftool.bash stop_guests $FOREMAN_NODE
+  bash vftool.bash start_guests $FOREMAN_NODE
 
   if [ "$UNATTENDED" = "false" ]; then
     echo 'press a key to continue when the foreman web UI is up'
@@ -148,19 +140,13 @@ if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
   else
     VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
   fi
-
-  for domname in $VMSET; do
-    if [ "$domname" != "${VMSET_CHUNK}nfs" ]; then
-      ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-        root@$domname "bash ${FOREMAN_CLIENT_SCRIPT}"
-    fi
-  done
+  vftool.bash run "bash ${FOREMAN_CLIENT_SCRIPT}"
 fi
 
 if [ "$SKIPSNAP" != "true" ]; then
   if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-    SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+    SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
   else
-    SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET
+    SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_take $VMSET
   fi
 fi

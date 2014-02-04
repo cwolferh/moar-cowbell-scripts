@@ -21,10 +21,11 @@ export INITIMAGE=${INITIMAGE:=rhel6rdo}
 export FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
 UNATTENDED=${UNATTENDED:=false}
 export FROM_SOURCE=${FROM_SOURCE:=true}
+POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=true}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
 provisioning_mode=false
-client_script_location=/mnt/vm-share/rdo/foreman_client_${FOREMAN_NODE}.sh
+client_script_location=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh
 
 configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=false}
 
@@ -84,7 +85,7 @@ bash vftool.bash start_guests
 
 while [[ ! -e /mnt/vm-share/$FOREMAN_NODE.hello ]]; do
   echo -n .
-  sleep 2
+  sleep 6
 done
 
 bash vftool.bash populate_etc_hosts
@@ -151,13 +152,21 @@ wait_for_foreman 443
 #pause_for_investigation
 
 # copy the client registration script somewhere handy
-VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $client_script_location"
+VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $client_script_location;
+chmod ugo+x $client_script_location"
 
+if [ "$POST_INSTALLER_SNAP" = "true" ]; then
 
-echo "Foreman is up!  Hit ctrl-c to leave it up, or enter to take another snapshot now"
-read
+  if [ "$UNATTENDED" != "true" ]; then
+    echo "Foreman is up!  Hit ctrl-c to leave it up, or enter to take another snapshot now"
+    read
+  fi
 
-SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
+  SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
+
+  echo "waiting for the https on foreman to come up"
+  wait_for_foreman 443
+fi
 
 echo "You should have foreman installed!  Along with the handy snaps:"
 bash vftool.bash snap_list $FOREMAN_NODE
