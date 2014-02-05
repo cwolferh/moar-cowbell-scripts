@@ -62,7 +62,7 @@ pause_for_investigation() {
 }
 
 if [[ ! -f $secret_rh_registration_script  ]]; then
-  echo 'you must set $secret_rh_registration_script (to register with subscription-manager)'
+  echo '$secret_rh_registration_script (to register or configure yum repos) must exist'
   exit 1
 fi
 if [[ ! -f "$MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash" ]]; then
