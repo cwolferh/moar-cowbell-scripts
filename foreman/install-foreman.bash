@@ -25,7 +25,7 @@ POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=true}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
 provisioning_mode=false
-client_script_location=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh
+FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/${FOREMAN_NODE}_foreman_client.sh}
 
 configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=false}
 
@@ -152,8 +152,8 @@ wait_for_foreman 443
 #pause_for_investigation
 
 # copy the client registration script somewhere handy
-VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $client_script_location;
-chmod ugo+x $client_script_location"
+VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $FOREMAN_CLIENT_SCRIPT;
+chmod ugo+x $FOREMAN_CLIENT_SCRIPT"
 
 if [ "$POST_INSTALLER_SNAP" = "true" ]; then
 

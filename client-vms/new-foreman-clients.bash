@@ -24,7 +24,7 @@ SKIP_FOREMAN_CLIENT_REGISTRATION=${SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
 # This client script must exist (if above var is true) before running
 # this script.  For now, cp it from /tmp on your foreman server to
 # your chosen location/name, will automate more in future
-FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh}
+FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/${FOREMAN_NODE}_foreman_client.sh}
 SKIPSNAP=${SKIPSNAP:=false}
 SNAPNAME=${SNAPNAME:=new_foreman_cli}
 
