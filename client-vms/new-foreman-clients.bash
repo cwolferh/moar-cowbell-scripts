@@ -72,8 +72,8 @@ done
 SETUP_COMMANDS="create_images prep_images start_guests"
 
 for setup_command in $SETUP_COMMANDS; do
-  echo "running bash -x vftool.bash $setup_command"
-  bash -x vftool.bash $setup_command
+  echo "running bash vftool.bash $setup_command"
+  vftool.bash $setup_command
   if [ "$UNATTENDED" = "false" ]; then
     echo "press enter to continue"
     read
@@ -93,8 +93,8 @@ while [[ $all_hosts_seen -ne 0 ]] ; do
   echo -n .
 done
 
-bash -x vftool.bash populate_etc_hosts
-bash -x vftool.bash populate_default_dns
+vftool.bash populate_etc_hosts
+vftool.bash populate_default_dns
 if [ "$UNATTENDED" = "false" ]; then
   echo 'press enter when the network is back up'
   read
@@ -103,7 +103,7 @@ else
 fi
 
 # restarting the network means need to restart the guests (tragically)
-bash -x vftool.bash stop_guests
+vftool.bash stop_guests
 
 if [ "$UNATTENDED" = "false" ]; then
   echo 'press enter when the guests have stopped'
@@ -112,9 +112,8 @@ else
   sleep 10
 fi
 
-bash -x vftool.bash first_snaps
-bash -x vftool.bash start_guests
-
+vftool.bash first_snaps
+vftool.bash start_guests
 vftool.bash wait_for_port 22
 
 if [ "$UNATTENDED" = "false" ]; then
@@ -123,16 +122,19 @@ if [ "$UNATTENDED" = "false" ]; then
 fi
 
 if [ "x$REG_SCRIPT" != "x" ]; then
-  bash -x vftool.bash run "bash ${REG_SCRIPT}"
+  vftool.bash run "bash ${REG_SCRIPT}"
 fi
 
 # chances are we will want augeas and puppet
-bash -x vftool.bash run "yum -y install augeas puppet"
+vftool.bash run "yum -y install augeas puppet"
+
+SNAPNAME=pre_foreman_cli vftool.bash reboot_snap_take $VMSET
+vftool.bash wait_for_port 22
 
 # populating dns restarts the network, so need to restart the foreman server
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-  bash vftool.bash stop_guests $FOREMAN_NODE
-  bash vftool.bash start_guests $FOREMAN_NODE
+  vftool.bash stop_guests $FOREMAN_NODE
+  vftool.bash start_guests $FOREMAN_NODE
 
   if [ "$UNATTENDED" = "false" ]; then
     echo 'press a key to continue when the foreman web UI is up'
