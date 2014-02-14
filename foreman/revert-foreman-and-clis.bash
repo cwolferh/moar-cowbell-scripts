@@ -48,7 +48,6 @@ VMSET="$VMSET_TO_REVERT" vftool.bash wait_for_port 22
 echo "waiting for webserver on $FOREMAN_NODE to come up"
 VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
 
-
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
   #VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3"
   VMSET=$VMSET_TO_REGISTER vftool.bash run \
