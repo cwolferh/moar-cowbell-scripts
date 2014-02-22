@@ -24,7 +24,12 @@ export FROM_SOURCE=${FROM_SOURCE:=true}
 POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=true}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
-provisioning_mode=false
+PROVISIONING_MODE=${PROVISIONING_MODE:=false}
+# TODO make these configurable
+provisioning_nic=eth1
+provisioning_ip=192.168.100.1
+provisioning_netmask=255.255.255.0
+
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/${FOREMAN_NODE}_foreman_client.sh}
 
 configure_repos_for_rdo=${CONFIGURE_REPOS_FOR_RDO:=false}
@@ -131,16 +136,21 @@ wait_for_foreman 22
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "yum -y update"
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "yum install -y openstack-foreman-installer augeas"
 
+if [ "$PROVISIONING_MODE" = "true" ]; then
+  /mnt/vm-share/vftool/vftool.bash configure_nic $FOREMAN_NODE static $provisioning_nic $provisioning_ip $provisioning_netmask
+fi
+
 SNAPNAME=just_the_rpms bash vftool.bash reboot_snap_take $FOREMAN_NODE
+
+pause_for_investigation
 
 echo "waiting for the sshd on foreman to come up"
 wait_for_foreman 22
 #pause_for_investigation
 
 echo "installing foreman"
-REVERT_FROM_SNAP=false \
+REVERT_FROM_SNAP=false PROVISIONING_MODE=$PROVISIONING_MODE \
   bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
-#ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "INSTALLER_DIR=$install_dir bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $provisioning_mode 2>&1 | tee -a /tmp/$FOREMAN_NODE-install-log"
 
 echo "waiting for the https on foreman to come up"
 wait_for_foreman 443
