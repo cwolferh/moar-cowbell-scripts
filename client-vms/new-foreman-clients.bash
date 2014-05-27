@@ -37,6 +37,9 @@ UNATTENDED=${UNATTENDED:=false}
 # blank.
 REG_SCRIPT=${REG_SCRIPT:=''}
 
+# stop the puppet agent to prevent auto checkin into foreman
+TURN_OFF_PUPPET_SERVICE=${TURN_OFF_PUPPET_SERVICE:=true}
+
 if [ "x$VMSET" = "x" -a "x${VMSET_CHUNK}" = "x" ]; then
   echo 'You must define $VMSET or $VMSET_CHUNK'; usage
 fi
@@ -48,16 +51,16 @@ fi
 
 if [ "x${VMSET_CHUNK}" != "x" ]; then
   numclis=$1
-  
+
   vmset="${VMSET_CHUNK}1"
-  
+
   i=2
   while [ $i -le $numclis ]; do
     vm="$VMSET_CHUNK$i"
     vmset="$vmset $vm"
     i=$[$i+1]
   done
-  
+
   export VMSET=$vmset
 fi
 
@@ -131,24 +134,26 @@ vftool.bash run "yum -y install augeas puppet"
 SNAPNAME=pre_foreman_cli vftool.bash reboot_snap_take $VMSET
 vftool.bash wait_for_port 22
 
-# populating dns restarts the network, so need to restart the foreman server
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
-  vftool.bash stop_guests $FOREMAN_NODE
-  vftool.bash start_guests $FOREMAN_NODE
-
   if [ "$UNATTENDED" = "false" ]; then
     echo 'press a key to continue when the foreman web UI is up'
     read
-  else
-    VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
   fi
+  VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
   vftool.bash run "bash ${FOREMAN_CLIENT_SCRIPT}"
 fi
 
 if [ "$SKIPSNAP" != "true" ]; then
   if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
     SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE
+    VMSET="$VMSET $FOREMAN_NODE" vftool.bash wait_for_port 22
   else
     SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_take $VMSET
+    vftool.bash wait_for_port 22
   fi
+fi
+
+if [ "$TURN_OFF_PUPPET_SERVICE" = "true" ]; then
+  vftool.bash run "/sbin/service puppet stop;
+    grep -qs 'release 6' /etc/redhat-release && chkconfig puppet off"
 fi

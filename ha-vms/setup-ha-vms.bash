@@ -29,8 +29,15 @@ UNATTENDED=${UNATTENDED:=false}
 SCRIPT_HOOK_REGISTRATION=${SCRIPT_HOOK_REGISTRATION:=''}
 
 # 3 VM's in a mysql HA-cluster.  one VM houses nfs shared-storage.
-export VMSET="${VM_PREFIX}c1 ${VM_PREFIX}c2 ${VM_PREFIX}c3 ${VM_PREFIX}nfs"
-HASET="${VM_PREFIX}c1 ${VM_PREFIX}c2 ${VM_PREFIX}c3"
+#export VMSET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3 ${VM_PREFIX}nfs"
+#HASET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3"
+#NFSSET="${VM_PREFIX}nfs"
+
+#export VMSET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3 ${VM_PREFIX}4 ${VM_PREFIX}5 ${VM_PREFIX}6 ${VM_PREFIX}nfs"
+#HASET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3 ${VM_PREFIX}4 ${VM_PREFIX}5 ${VM_PREFIX}6 ${VM_PREFIX}7"
+
+export VMSET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3 ${VM_PREFIX}4 ${VM_PREFIX}nfs"
+HASET="${VM_PREFIX}1 ${VM_PREFIX}2 ${VM_PREFIX}3 ${VM_PREFIX}4"
 NFSSET="${VM_PREFIX}nfs"
 
 if ! which vftool.bash; then
@@ -64,24 +71,24 @@ echo "VMs created!  Now, installing HA-specific rpm's"
 #priority=1
 #EOF
 
-for domname in $HASET; do
-  #ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
+#for domname in $HASET; do
+  #vftool.bash run \
   #  root@$domname "yum-config-manager --enable rhel-ha-for-rhel-6-server-rpms"
   # set clusterlabs repo
-  #ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
+  #vftool.bash run \
   #  root@$domname "cp /mnt/vm-share/tmp/clusterlabs.repo /etc/yum.repos.d/clusterlabs.repo"
-  ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-    root@$domname "yum -y install mysql-server MySQL-python ccs pcs cman"
-  ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
-    root@$domname "yum -y install puppet augeas"
-done
+  VMSET=$HASET vftool.bash run \
+    "yum -y install mysql-server MySQL-python ccs pcs cman"
+  VMSET=$HASET vftool.bash run \
+    "yum -y install puppet augeas"
+#done
 
 # install augeas on nfs server (its not subscribed to foreman and
 # didn't run the client script that normally installs augeas...
-ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
- root@${VM_PREFIX}nfs "yum -y install augeas mysql"
+VMSET=${VM_PREFIX}nfs vftool.bash run \
+ "yum -y install augeas mysql"
 
-SNAPNAME=more_ha_rpms vftool.bash reboot_snap_take
+SNAPNAME=more_ha_rpms vftool.bash reboot_snap_take $VMSET
 vftool.bash wait_for_port 22
 
 echo "RPM's installed.  Now, beginning networiking HA / NFS config"
@@ -89,48 +96,29 @@ echo "RPM's installed.  Now, beginning networiking HA / NFS config"
 # TODO script augeas-is-installed check (pause script if not)
 
 mkdir -p /mnt/vm-share/tmp
-for i in 1 2 3 4; do
-  DOMNAME=${VM_PREFIX}c$i
+#for i in 1 2 3 4 5 6 7 nfs; do
+for i in 1 2 3 4 nfs; do
+  DOMNAME=${VM_PREFIX}$i
   IPADDR=$CLUSUBNET.1$i
-  if [ "$DOMNAME" = "${VM_PREFIX}c4" ]; then
+  if [ "$DOMNAME" = "${VM_PREFIX}nfs" ]; then
      DOMNAME=${VM_PREFIX}nfs
-     IPADDR=$CLUSUBNET.200
+     IPADDR=$CLUSUBNET.100
   fi
 
-  cat > /mnt/vm-share/tmp/$DOMNAME-ifconfig.bash <<EOCAT
+  vftool.bash configure_nic $DOMNAME static $HANIC $IPADDR $CLUSUBNET.0
 
-augtool <<EOA
-set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/BOOTPROTO none
-set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/IPADDR    $IPADDR
-set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/NETMASK   255.255.255.0
-set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/NM_CONTROLLED no
-set /files/etc/sysconfig/network-scripts/ifcfg-$HANIC/ONBOOT    yes
-save
-EOA
-
-ifup $HANIC
-EOCAT
-
-done
-
-for i in 1 2 3 4; do
-  DOMNAME=${VM_PREFIX}c$i
-  IPADDR=$CLUSUBNET.1$i
-  if [ "$DOMNAME" = "${VM_PREFIX}c4" ]; then
-     DOMNAME=${VM_PREFIX}nfs
-  fi
-
-  sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" $DOMNAME "bash -x /mnt/vm-share/tmp/$DOMNAME-ifconfig.bash"
 done
 
 # disable nfs v4 so that mounted /var/lib/mysql works
-sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VM_PREFIX}nfs "sed -i 's/#RPCNFSDARGS=\"-N 4\"/RPCNFSDARGS=\"-N 4\"/' /etc/sysconfig/nfs"
+VMSET=${VM_PREFIX}nfs vftool.bash run "sed -i 's/#RPCNFSDARGS=\"-N 4\"/RPCNFSDARGS=\"-N 4\"/' /etc/sysconfig/nfs"
 # install the mysql rpm so we get the mysql system (/etc/passwd) user
-sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VM_PREFIX}nfs "yum -y install mysql"
 # create nfs mount point on the nfs server.  ready to be mounted!
-echo sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VM_PREFIX}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on"
+#echo sudo vftool.bash run ${VM_PREFIX}nfs "mkdir -p /mnt/mysql; chown mysql.mysql /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on"
 
-sudo ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" ${VM_PREFIX}nfs "mkdir -p /mnt/mysql; chmod ugo+rwx /mnt/mysql; echo '/mnt/mysql $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports; /sbin/service nfs restart; /sbin/chkconfig nfs on"
+VMSET=${VM_PREFIX}nfs vftool.bash run "mkdir -p /mnt/mysql; chown mysql.mysql /mnt/mysql; chmod ug+rwx /mnt/mysql; echo '/mnt/mysql $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports;"
+VMSET=${VM_PREFIX}nfs vftool.bash run "mkdir -p /mnt/glance; chmod ug+rwx /mnt/glance; echo '/mnt/glance $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports;"
+VMSET=${VM_PREFIX}nfs vftool.bash run "mkdir -p /mnt/cinder; chmod ug+rwx /mnt/cinder; echo '/mnt/cinder $CLUSUBNET.0/16(rw,sync,no_root_squash)' >> /etc/exports;"
+VMSET=${VM_PREFIX}nfs vftool.bash run "/sbin/service nfs restart; /sbin/chkconfig nfs on"
 
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" = "false" ]; then
   SNAPNAME=$SNAPNAME bash -x vftool.bash reboot_snap_take $VMSET $FOREMAN_NODE

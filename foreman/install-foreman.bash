@@ -21,7 +21,7 @@ export INITIMAGE=${INITIMAGE:=rhel6rdo}
 export FOREMAN_NODE=${FOREMAN_NODE:=fore$( < /dev/urandom tr -dc a-z0-9 | head -c 4 )}
 UNATTENDED=${UNATTENDED:=false}
 export FROM_SOURCE=${FROM_SOURCE:=true}
-POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=true}
+POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=false}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
 PROVISIONING_MODE=${PROVISIONING_MODE:=false}
@@ -44,21 +44,6 @@ secret_rh_registration_script=${REG_SCRIPT:=/mnt/vm-share/tmp/just-subscribe.sh}
 # set VMSET for vftool.bash
 export VMSET="$FOREMAN_NODE"
 
-wait_for_foreman() {
-  port=$1
-  ssh_up_cmd="true"
-  for vm in $VMSET; do
-    ssh_up_cmd="$ssh_up_cmd && nc -w1 -z $vm $port"
-  done
-  exit_status=1
-  while [[ $exit_status -ne 0 ]] ; do
-    eval $ssh_up_cmd > /dev/null
-    exit_status=$?
-    echo -n .
-    sleep 2
-  done
-}
-
 pause_for_investigation() {
   if [ "$UNATTENDED" != "true" ]; then
     echo "PAUSED.  look around, and hit a key to continue"
@@ -75,32 +60,26 @@ if [[ ! -f "$MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash" ]]; then
   echo 'verify $MCS_SCRIPTS_DIR (currently set to ' $MCS_SCRIPTS_DIR ')'
   exit 1
 fi
-if [[ ! -f vftool.bash  ]]; then
-  echo 'vftool.bash needs to be in your current dir (TODO change this :-)'
+if ! which vftool.bash; then
+  echo 'vftool.bash must be in your PATH'
   exit 1
 fi
 if [[ ! -f /mnt/vm-share/vftool/vftool.bash  ]]; then
   echo '/mnt/vm-share/vftool/vftool.bash needs to exist (to be accessible by the foreman node)'
   exit 1
 fi
-bash vftool.bash create_images
-bash vftool.bash prep_images
+vftool.bash create_images
+vftool.bash prep_images
 sleep 15  # TODO script to make sure /mnt/$FOREMAN_NODE is unmounted
-bash vftool.bash start_guests
+vftool.bash start_guests
 
 while [[ ! -e /mnt/vm-share/$FOREMAN_NODE.hello ]]; do
   echo -n .
   sleep 6
 done
 
-bash vftool.bash populate_etc_hosts
-bash vftool.bash populate_default_dns
-
-bash vftool.bash stop_guests
-bash vftool.bash start_guests
-
-echo "waiting for the sshd on foreman to come up"
-wait_for_foreman 22
+vftool.bash populate_etc_hosts
+vftool.bash populate_default_dns
 
 # subscribe to get your red hat bits
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "bash $secret_rh_registration_script"
@@ -127,10 +106,10 @@ EOF
   ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "rpm --nodigest --quiet -q rdo-release-havana-6 || yum install http://repos.fedorapeople.org/repos/openstack/openstack-havana/rdo-release-havana-6.noarch.rpm"
 fi
 
-SNAPNAME=pre_foreman_rpms bash vftool.bash reboot_snap_take $FOREMAN_NODE
+SNAPNAME=pre_foreman_rpms vftool.bash reboot_snap_take $FOREMAN_NODE
 
 echo "waiting for the sshd on foreman to come up"
-wait_for_foreman 22
+vftool.bash wait_for_port 22
 #pause_for_investigation
 
 ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t root@$FOREMAN_NODE "yum -y update"
@@ -140,21 +119,19 @@ if [ "$PROVISIONING_MODE" = "true" ]; then
   /mnt/vm-share/vftool/vftool.bash configure_nic $FOREMAN_NODE static $provisioning_nic $provisioning_ip $provisioning_netmask
 fi
 
-SNAPNAME=just_the_rpms bash vftool.bash reboot_snap_take $FOREMAN_NODE
+SNAPNAME=just_the_rpms vftool.bash reboot_snap_take $FOREMAN_NODE
 
 pause_for_investigation
 
 echo "waiting for the sshd on foreman to come up"
-wait_for_foreman 22
-#pause_for_investigation
+vftool.bash wait_for_port 22
 
 echo "installing foreman"
 REVERT_FROM_SNAP=false PROVISIONING_MODE=$PROVISIONING_MODE \
   bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
 
 echo "waiting for the https on foreman to come up"
-wait_for_foreman 443
-#pause_for_investigation
+vftool.bash wait_for_port 443
 
 # TODO: script-check that is safe to restart (probably by looking for
 # tail of /tmp/$FOREMAN_NODE-install-log to match known value)
@@ -162,7 +139,7 @@ wait_for_foreman 443
 #pause_for_investigation
 
 # copy the client registration script somewhere handy
-VMSET=$FOREMAN_NODE bash vftool.bash run "cp /tmp/foreman_client.sh $FOREMAN_CLIENT_SCRIPT;
+VMSET=$FOREMAN_NODE vftool.bash run "cp /tmp/foreman_client.sh $FOREMAN_CLIENT_SCRIPT;
 chmod ugo+x $FOREMAN_CLIENT_SCRIPT"
 
 if [ "$POST_INSTALLER_SNAP" = "true" ]; then
@@ -172,11 +149,11 @@ if [ "$POST_INSTALLER_SNAP" = "true" ]; then
     read
   fi
 
-  SNAPNAME=post_installer bash vftool.bash reboot_snap_take $FOREMAN_NODE
+  SNAPNAME=post_installer vftool.bash reboot_snap_take $FOREMAN_NODE
 
   echo "waiting for the https on foreman to come up"
-  wait_for_foreman 443
+  vftool.bash wait_for_port 443
 fi
 
 echo "You should have foreman installed!  Along with the handy snaps:"
-bash vftool.bash snap_list $FOREMAN_NODE
+vftool.bash snap_list $FOREMAN_NODE

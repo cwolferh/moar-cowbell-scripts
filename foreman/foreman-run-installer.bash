@@ -23,16 +23,7 @@ fi
 # "[Errno 256] No more mirrors to try" in the installer's yum updates
 # YUM_REFRESH=${YUM_REFRESH:=false}
 
-test_ssh="nc -w1 -z $FOREMAN_NODE 22"
-echo "waiting for ssh on $FOREMAN_NODE to come up"
-sleep 10
-exit_status=1
-while [[ $exit_status -ne 0 ]] ; do
-  eval $test_ssh > /dev/null
-  exit_status=$?
-  echo -n .
-  sleep 2
-done
+vftool.bash wait_for_port 22
 
 # this hack is probably not necessary most of the time
 #if [ "$YUM_REFRESH" = "true" ]; then
