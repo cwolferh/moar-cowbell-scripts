@@ -31,7 +31,7 @@ if [ "$FROM_SOURCE" = "true" ]; then
 fi
 
 # a hook for a wrapper script to have its way
-if -f /mnt/vm-share/pre-foreman-install.bash; then
+if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
   bash -x /mnt/vm-share/pre-foreman-install.bash
 fi
 
