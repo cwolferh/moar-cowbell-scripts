@@ -23,7 +23,7 @@ fi
 # "[Errno 256] No more mirrors to try" in the installer's yum updates
 # YUM_REFRESH=${YUM_REFRESH:=false}
 
-vftool.bash wait_for_port 22
+VMSET=$FOREMAN_NODE vftool.bash wait_for_port 22
 
 # this hack is probably not necessary most of the time
 #if [ "$YUM_REFRESH" = "true" ]; then
