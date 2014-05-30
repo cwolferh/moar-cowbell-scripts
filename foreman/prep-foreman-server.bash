@@ -22,7 +22,7 @@ PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
 ## temporary workaround
 #yum -y install /mnt/vm-share/tmp/openstack-puppet-modules-2013.2-9.el6ost.noarch.rpm
-rpm -e packstack-modules-puppet
+yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-12.el7ost.noarch.rpm
 
 if [ "$FROM_SOURCE" = "true" ]; then
   mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
@@ -31,7 +31,7 @@ if [ "$FROM_SOURCE" = "true" ]; then
 fi
 
 # a hook for a wrapper script to have its way
-if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
+if -f /mnt/vm-share/pre-foreman-install.bash; then
   bash -x /mnt/vm-share/pre-foreman-install.bash
 fi
 
@@ -59,9 +59,9 @@ perl -p -i -e 's/swift_local_interface".*,/swift_local_interface"           => "
 #perl -p -i -e 's/ovs_vlan_ranges".*,/ovs_vlan_ranges"           => "physnet1:1000:2000",/g' \
 perl -p -i -e 's/ovs_vlan_ranges".*,/ovs_vlan_ranges"           => "ext-vlan:1000:2000",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/ovs_bridge_uplinks".*,/ovs_bridge_uplinks"           => "\[\\"br-ex:eth6\\"\]",/g' \
+perl -p -i -e 's/ovs_bridge_uplinks".*,/ovs_bridge_uplinks"           => \["br-ex:eth6"\],/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/ovs_bridge_mappings".*,/ovs_bridge_mappings"           => "\[\\"ext-vlan:br-ex\\"\]",/g' \
+perl -p -i -e 's/ovs_bridge_mappings".*,/ovs_bridge_mappings"           => \["ext-vlan:br-ex"\],/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/tenant_network_type".*,/tenant_network_type"           => "vlan",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
