@@ -21,6 +21,8 @@ PUPPET_PACEMAKER=${PUPPET_PACEMAKER:=/mnt/vm-share/puppet-pacemaker}
 PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
 #yum -y install /mnt/vm-share/tmp/openstack-puppet-modules-2013.2-9.el6ost.noarch.rpm
+#yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-14.6.el7ost.noarch.rpm
+yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-16.2.el7ost.noarch.rpm 
 
 if [ "$FROM_SOURCE" = "true" ]; then
   mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
@@ -28,7 +30,7 @@ if [ "$FROM_SOURCE" = "true" ]; then
   find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
 fi
 
-# a hook for a wrapper script to have its way
+ a hook for a wrapper script to have its way
 if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
   bash -x /mnt/vm-share/pre-foreman-install.bash
 fi
@@ -40,15 +42,15 @@ perl -p -i -e 's/mysql_root_password".*,/mysql_root_password"           => "mysq
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/keystone_db_password".*,/keystone_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/glance_db_password".*,/glance_db_password"           => "glancedbpw",/g' \
+perl -p -i -e 's/glance_db_password".*,/glance_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/nova_db_password".*,/nova_db_password"           => "novadbpw",/g' \
+perl -p -i -e 's/nova_db_password".*,/nova_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/cinder_db_password".*,/cinder_db_password"           => "cinderdbpw",/g' \
+perl -p -i -e 's/cinder_db_password".*,/cinder_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/heat_db_password".*,/heat_db_password"           => "heatdbpw",/g' \
+perl -p -i -e 's/heat_db_password".*,/heat_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/neutron_db_password".*,/neutron_db_password"           => "neutrondbpw",/g' \
+perl -p -i -e 's/neutron_db_password".*,/neutron_db_password"           => "123456",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/"neutron".*,/"neutron"           => "true",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
@@ -80,6 +82,10 @@ perl -p -i -e 's/(.*swift_all_ips.*=>\s?).*$/$1\["192.168.111.11", "192.168.111.
 perl -p -i -e 's/(.*lb_backend_server_addrs.*=>\s?).*$/$1\["192.168.200.10","192.168.200.20","192.168.200.30"\],/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(.*lb_backend_server_names.*=>\s?).*$/$1\["c1a1","c1a2","c1a3"\],/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/(.*wsrep_cluster_members.*=>\s?).*$/$1\["192.168.200.10","192.168.200.20","192.168.200.30"\],/g' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/(params = {\n)/$1  "keystonerc"             =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "storage_device"    =>  "192.168.111.100:\/mnt\/mysql",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
@@ -183,13 +189,13 @@ perl -p -i -e 's/(params = {\n)/$1  "include_horizon"    =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "include_nova"    =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "include_neutron"    =>  "true",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "include_neutron"    =>  "false",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "include_swift"    =>  "true",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "include_swift"    =>  "false",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "include_qpid"    =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "fencing_type"    =>  "fence_xvm",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "fencing_type"    =>  "disabled",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "pcmk_fs_manage"    =>  "false",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
@@ -215,6 +221,11 @@ perl -p -i -e 's/rake db:seed/rake --trace db:seed/g' \
 if [ "$JUST_SEEDS" = "true" ]; then
   exit 0
 fi
+
+#mkdir -p                /usr/share/openstack-puppet/modules
+#rm -rf                  /usr/share/openstack-puppet/modules/xinetd
+#cp -r /mnt/vm-share/puppetlabs-xinetd /usr/share/openstack-puppet/modules/xinetd
+#ind /usr/share/openstack-puppet/modules/xinetd -name '.git' | xargs rm -rf
 
 #mkdir -p                /usr/share/openstack-puppet/modules
 #rm -rf                  /usr/share/openstack-puppet/modules/pacemaker

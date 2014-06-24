@@ -20,14 +20,16 @@ which vftool.bash || exit 1
 if [ "$REVERT_CLIS" = "true" ]; then
   SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $VMSET
 fi
+vftool.bash wait_for_port 22
+vftool.bash run "killall puppet; rm -rf /var/lib/puppet/ssl;"
 
 for vm in $VMSET; do
-  VMSET=$FOREMAN_NODE vftool.bash run "puppet cert clean ${vm}.example.com"
+  # call clean twice
+  VMSET=$FOREMAN_NODE vftool.bash run "puppet cert clean ${vm}.example.com; puppet cert clean ${vm}.example.com"
 done
-VMSET=$FOREMAN_NODE vftool.bash run "/etc/init.d/httpd restart"
-VMSET=$FOREMAN_NODE vftool.bash wait_for_port 443
 
-vftool.bash wait_for_port 22
+#VMSET=$FOREMAN_NODE vftool.bash run "/etc/init.d/httpd restart"
+#VMSET=$FOREMAN_NODE vftool.bash wait_for_port 443
 
-vftool.bash run "rm -rf /var/lib/puppet; bash -x $FOREMAN_CLIENT_SCRIPT"
+vftool.bash run "killall puppet; rm -rf /var/lib/puppet/ssl; bash -x $FOREMAN_CLIENT_SCRIPT"
 
