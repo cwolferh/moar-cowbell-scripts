@@ -169,11 +169,11 @@ perl -p -i -e 's/(params = {\n)/$1  "heat_cfn_private_vip"    =>  "192.168.201.1
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "heat_cfn_admin_vip"    =>  "192.168.201.125",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "qpid_vip"    =>  "192.168.201.13",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "amqp_vip"    =>  "192.168.201.13",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "backend_port"    =>  "5673",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "pcmk_fs_device"    =>  "192.168.111.100:\/mnt\/glance",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "pcmk_fs_device"    =>  "192.168.200.100:\/mnt\/glance",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "pcmk_fs_manage"    =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
@@ -193,7 +193,9 @@ perl -p -i -e 's/(params = {\n)/$1  "include_neutron"    =>  "false",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "include_swift"    =>  "false",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/(params = {\n)/$1  "include_qpid"    =>  "true",\n/' \
+perl -p -i -e 's/(params = {\n)/$1  "include_qpid"    =>  "false",\n/' \
+  /usr/share/openstack-foreman-installer/bin/seeds.rb
+perl -p -i -e 's/(params = {\n)/$1  "include_rabbitmq"    =>  "true",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/(params = {\n)/$1  "fencing_type"    =>  "disabled",\n/' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
