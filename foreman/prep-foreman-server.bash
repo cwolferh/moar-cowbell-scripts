@@ -65,7 +65,7 @@ perl -p -i -e 's/ovs_bridge_mappings".*,/ovs_bridge_mappings"           => \["ex
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/tenant_network_type".*,/tenant_network_type"           => "vlan",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
-perl -p -i -e 's/enable_tunneling".*,/enable_tunneling"           => "False",/g' \
+perl -p -i -e 's/enable_tunneling".*,/enable_tunneling"           => "true",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
 perl -p -i -e 's/swift_ring_server".*,/swift_ring_server"           => "192.168.111.55",/g' \
   /usr/share/openstack-foreman-installer/bin/seeds.rb
