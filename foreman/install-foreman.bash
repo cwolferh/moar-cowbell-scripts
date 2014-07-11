@@ -23,6 +23,7 @@ UNATTENDED=${UNATTENDED:=false}
 export FROM_SOURCE=${FROM_SOURCE:=true}
 POST_INSTALLER_SNAP=${POST_INSTALLER_SNAP:=false}
 MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
+FOREMAN_POST_INSTALL_SCRIPT=${FOREMAN_POST_INSTALL_SCRIPT:=/bin/true}
 
 PROVISIONING_MODE=${PROVISIONING_MODE:=false}
 # TODO make these configurable
@@ -128,6 +129,7 @@ vftool.bash wait_for_port 22
 
 echo "installing foreman"
 REVERT_FROM_SNAP=false PROVISIONING_MODE=$PROVISIONING_MODE \
+FOREMAN_POST_INSTALL_SCRIPT=$FOREMAN_POST_INSTALL_SCRIPT \
   bash -x $MCS_SCRIPTS_DIR/foreman/foreman-run-installer.bash
 
 echo "waiting for the https on foreman to come up"

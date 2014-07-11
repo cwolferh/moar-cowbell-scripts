@@ -15,6 +15,8 @@ PROVISIONING_MODE=${PROVISIONING_MODE:=false}
 # only applicable for provisioning mode
 INSTALLURL=${INSTALLURL:=http://yourrhel6mirror.com/somepath/os/x86_64/}
 
+FOREMAN_POST_INSTALL_SCRIPT=${FOREMAN_POST_INSTALL_SCRIPT:=/bin/true}
+
 if [ "$REVERT_FROM_SNAP" = "true" ]; then
   SNAPNAME=$FOREMAN_SNAPNAME vftool.bash reboot_snap_revert $FOREMAN_NODE
 fi
@@ -32,8 +34,7 @@ VMSET=$FOREMAN_NODE vftool.bash wait_for_port 22
 #fi
 
 echo "prep foreman-server"
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' \
-  root@$FOREMAN_NODE "FROM_SOURCE=${FROM_SOURCE} bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
+VMSET=$FOREMAN_NODE vftool.bash run "FROM_SOURCE=${FROM_SOURCE} bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 if [ $DUMP_ASTAPOR_OUTPUT = "true" ]; then
@@ -42,5 +43,6 @@ if [ $DUMP_ASTAPOR_OUTPUT = "true" ]; then
 else
   cmdsuffix='>/tmp/'$FOREMAN_NODE'-install-log 2>&1'
 fi
-ssh -o 'UserKnownHostsFile /dev/null' -o 'StrictHostKeyChecking no' -t \
-  root@$FOREMAN_NODE "INSTALLURL=$INSTALLURL bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $PROVISIONING_MODE $cmdsuffix"
+VMSET=$FOREMAN_NODE vftool.bash run "INSTALLURL=$INSTALLURL bash -x /mnt/vm-share/vftool/vftool.bash install_foreman_here $PROVISIONING_MODE $cmdsuffix"
+
+VMSET=$FOREMAN_NODE vftool.bash run $FOREMAN_POST_INSTALL_SCRIPT

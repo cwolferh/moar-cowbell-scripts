@@ -20,9 +20,7 @@ ASTAPOR=${ASTAPOR:=/mnt/vm-share/astapor}
 PUPPET_PACEMAKER=${PUPPET_PACEMAKER:=/mnt/vm-share/puppet-pacemaker}
 PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
-#yum -y install /mnt/vm-share/tmp/openstack-puppet-modules-2013.2-9.el6ost.noarch.rpm
-#yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-14.6.el7ost.noarch.rpm
-yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-16.2.el7ost.noarch.rpm 
+#yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-16.2.el7ost.noarch.rpm 
 
 if [ "$FROM_SOURCE" = "true" ]; then
   mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
@@ -30,10 +28,16 @@ if [ "$FROM_SOURCE" = "true" ]; then
   find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
 fi
 
- a hook for a wrapper script to have its way
+# a hook for a wrapper script to have its way
 if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
   bash -x /mnt/vm-share/pre-foreman-install.bash
 fi
+
+if $(rpm -q --queryformat "%{RPMTAG_VERSION}" foreman | grep -qP '^(2|1.[6789])') ; then
+exit 0
+fi
+
+############## BELOW ONLY EXECUTES FOR FOREMAN < 1.6 !!!!!!!!!!!!!!!
 
 # easy default passwords please
 perl -p -i -e 's/swift_shared_secret.*SecureRandom\.hex/swift_shared_secret"           => "123456"/g' \
