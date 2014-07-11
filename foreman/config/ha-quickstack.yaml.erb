@@ -267,3 +267,33 @@
     swift_storage_device: device1
     swift_storage_ips:
     - 192.168.111.14
+# quickstack::nova_network::compute:
+    amqp_host: 192.168.201.13
+    amqp_provider: rabbitmq
+    amqp_ssl_port: '5671'
+    auth_host: 192.168.201.33
+    # don't matter with false ceilometer
+    #ceilometer_metering_secret: ad28a30791819b323769996da7f046e3
+    #ceilometer_user_password: 9790e2f72de98c855795ae96d8f4e772
+    cinder_backend_gluster: 'false'
+    cinder_backend_nfs: 'false'
+    glance_host: 192.168.201.23
+    mysql_ca: /etc/ipa/ca.crt
+    mysql_host: 192.168.201.7
+    network_create_networks: true
+    network_fixed_range: 10.0.0.0/24
+    network_floating_range: 10.0.1.0/24
+    network_manager: FlatDHCPManager
+    network_network_size: ''
+    network_num_networks: 1
+    ## commenting out because results in the following in foreman yaml
+    ##   network_overrides: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+    ##network_overrides:
+    ##  force_dhcp_release: false
+    network_private_iface: eth5
+    network_private_network: 192.168.203.0
+    network_public_iface: eth6
+    network_public_network: 192.168.204.0
+    nova_db_password: '123456'
+    nova_host: 192.168.201.63
+    ssl: 'false'
