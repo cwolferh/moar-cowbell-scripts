@@ -23,6 +23,7 @@ export VMSET_TO_REGISTER=${VMSET_TO_REGISTER:=$VMSET_TO_REVERT}
 SKIP_FOREMAN_RUN_INSTALLER=${SKIP_FOREMAN_RUN_INSTALLER:=false}
 SKIP_FOREMAN_CLIENT_REGISTRATION=${SKIP_FOREMAN_CLIENT_REGISTRATION:=false}
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/${FOREMAN_NODE}_foreman_client.sh}
+export FOREMAN_POST_INSTALL_SCRIPT=${FOREMAN_POST_INSTALL_SCRIPT:=/bin/true}
 
 pause_for_investigation() {
   if [ "$UNATTENDED" != "true" ]; then
@@ -37,7 +38,6 @@ if [ "$SKIP_FOREMAN_RUN_INSTALLER" != "true" ]; then
   pause_for_investigation
 fi
 
-#VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3 ${VMSET_CHUNK}nfs" 
 VMSET=$VMSET_TO_REVERT
 echo "reverting all other nodes: $VMSET"
 SNAPNAME=$SNAPNAME bash vftool.bash reboot_snap_revert $VMSET
@@ -49,7 +49,6 @@ echo "waiting for webserver on $FOREMAN_NODE to come up"
 VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
 
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
-  #VMSET="${VMSET_CHUNK}c1 ${VMSET_CHUNK}c2 ${VMSET_CHUNK}c3"
   VMSET=$VMSET_TO_REGISTER vftool.bash run \
-     "bash ${FOREMAN_CLIENT_SCRIPT} && /etc/init.d/puppet stop &" 
+     "bash -x ${FOREMAN_CLIENT_SCRIPT} ; service puppet stop" & 
 fi
