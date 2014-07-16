@@ -13,7 +13,7 @@
     backend_glusterfs_name: glusterfs_backend
     backend_iscsi: false
     backend_iscsi_name: iscsi_backend
-    backend_nfs: false
+    backend_nfs: true
     backend_nfs_name: nfs_backend
     backend_rbd: false
     backend_rbd_name: rbd_backend
@@ -30,7 +30,8 @@
     glusterfs_shares: '[]'
     multiple_backends: false
     nfs_mount_options: ''
-    nfs_shares: '[]'
+    nfs_shares:
+    - 192.168.200.100:/mnt/cinder
     rbd_ceph_conf: /etc/ceph/ceph.conf
     rbd_flatten_volume_from_snapshot: false
     rbd_max_clone_depth: '5'
@@ -46,7 +47,7 @@
     - ''
     san_thin_provision:
     - false
-    volume: false
+    volume: true
 #  quickstack::pacemaker::common:
     fence_ipmilan_address: ''
     fence_ipmilan_expose_lanplus: 'true'
