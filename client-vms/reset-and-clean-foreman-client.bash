@@ -3,9 +3,7 @@
 # Sample usage:
 #   REVERT_CLIS=true VMSET="c1a2 c1a3" FOREMAN_NODE=fore1a SNAPNAME=pre_foreman_cli FOREMAN_CLIENT_SCRIPT=/mnt/vm-share/fore1a_client.sh ./reset-and-clean-foreman-client.bash
 #
-# BIG TODO: Right now, the hosts should be deleted from the foreman UI
-# before running this script.  Instead, this script should use the
-# foreman api to delete them.
+# Note that the hosts are disassociated from their hostgroups.
 
 # assumes CLI_NODE at SNAPNAME is pre-foreman registration
 export VMSET=${VMSET:="c1a1 c1a2 c1a3"}
@@ -15,8 +13,12 @@ SNAPNAME=${SNAPNAME:=pre_foreman_cli}
 FOREMAN_NODE=${FOREMAN_NODE:=fore1a}
 
 FOREMAN_CLIENT_SCRIPT=${FOREMAN_CLIENT_SCRIPT:=/mnt/vm-share/rdo/foreman_client_${FOREMAN_NODE}.sh}
+MCS_SCRIPTS_DIR=${MCS_SCRIPTS_DIR:=/mnt/vm-share/mcs}
 
 which vftool.bash || exit 1
+
+VMSET=$FOREMAN_NODE vftool.bash run "$MCS_SCRIPTS_DIR/foreman/api/hosts.rb clear_hostgroup $VMSET"
+
 if [ "$REVERT_CLIS" = "true" ]; then
   SNAPNAME=$SNAPNAME vftool.bash reboot_snap_revert $VMSET
 fi
