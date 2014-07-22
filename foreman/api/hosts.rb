@@ -53,6 +53,31 @@ Usage: #{__FILE__} [OPTIONS] COMMAND
   end
 end
 
+def show_yaml()
+  hosts = Set.new(ARGV[1..-1])
+  all_hosts = @hosts.index()[0]['results']
+  all_hosts.each do |h|
+    longname = h['name']
+    shortname = /^(.*?)\./.match(h['name'])[1]
+    if hosts.include?(longname) or hosts.include?(shortname)
+      foremanurl = @auth[:base_url]
+      puts `curl -s -k -u admin:changeme "#{foremanurl}/hosts/#{longname}?format=yaml"`
+    end
+  end
+end
+
+def show_hostgroup()
+  hosts = Set.new(ARGV[1..-1])
+  all_hosts = @hosts.index()[0]['results']
+  all_hosts.each do |h|
+    longname = h['name']
+    shortname = /^(.*?)\./.match(h['name'])[1]
+    if hosts.include?(longname) or hosts.include?(shortname)
+      puts h['hostgroup_name']
+    end
+  end
+end
+
 def get_hostgroup_id(hostgroup_name='')
   puts  hostgroup_name
   all_hostgroups = @hostgroups.index()[0]['results']
@@ -91,14 +116,15 @@ end
 
 options = Optparse.parse(ARGV)
 
-auth = {
+@auth = {
   :base_url => options.base_url,
   :username => options.username,
   :password => options.password
 }
 
-@hosts  = ForemanApi::Resources::Host.new(auth)
-@hostgroups  = ForemanApi::Resources::Hostgroup.new(auth)
+@hosts  = ForemanApi::Resources::Host.new(@auth)
+@hostgroups  = ForemanApi::Resources::Hostgroup.new(@auth)
+@parameters  = ForemanApi::Resources::Parameter.new(@auth)
 
 case ARGV[0]
 
@@ -106,6 +132,10 @@ when 'clear_hostgroup'
   set_hostgroup
 when 'set_hostgroup'
   set_hostgroup(get_hostgroup_id(ARGV[1]))
+when 'show_hostgroup'
+  show_hostgroup
+when 'show_yaml'
+  show_yaml
 else
   puts Optparse.parse(['-h'])
 end
