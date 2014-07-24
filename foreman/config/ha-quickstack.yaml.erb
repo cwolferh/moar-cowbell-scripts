@@ -27,7 +27,7 @@
     - default
     eqlx_use_chap:
     - false
-    glusterfs_shares: '[]'
+    glusterfs_shares: []
     multiple_backends: false
     nfs_mount_options: ''
     nfs_shares:
@@ -52,7 +52,7 @@
     fence_ipmilan_address: ''
     fence_ipmilan_expose_lanplus: 'true'
     fence_ipmilan_hostlist: ''
-    fence_ipmilan_host_to_address: '[]'
+    fence_ipmilan_host_to_address: []
     fence_ipmilan_interval: 60s
     fence_ipmilan_lanplus_options: ''
     fence_ipmilan_password: ''
@@ -148,16 +148,15 @@
     - gre
     - vxlan
     ml2_vxlan_group: 224.0.0.1
-    ovs_bridge_mappings:
-    - ext-vlan:br-ex
-    ovs_bridge_uplinks:
-    - br-ex:eth6
+    ovs_bridge_mappings: []
+#    - ext-vlan:br-ex
+    ovs_bridge_uplinks: []
+#    - br-ex:eth6
     ovs_tunnel_iface: eth6
     ovs_tunnel_network: ''
 #    ovs_tunnel_types:
 #    - vxlan
-    ovs_tunnel_types:
-    - ""
+    ovs_tunnel_types: []
     ovs_vlan_ranges: ext-vlan:1000:2000
     ovs_vxlan_udp_port: '4789'
     tenant_network_type: vlan
@@ -270,6 +269,7 @@
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.13
     amqp_provider: rabbitmq
+#    amqp_provider: qpid
     amqp_ssl_port: '5671'
     auth_host: 192.168.201.33
     # don't matter with false ceilometer
