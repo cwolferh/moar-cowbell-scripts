@@ -10,7 +10,8 @@
 # Typical order of operations:
 #  * get an HA-all-in-one-controller running on nodes $monnames
 #  * run bm-simple-server-prep.bash on the bare-metal host (make sure
-#     $nodename in script is correct)
+#     $nodename in that script is correct, it should be the same as 
+#     $osdnodename below)
 #  * run this script *on the $osdnodename vm*
 
 
