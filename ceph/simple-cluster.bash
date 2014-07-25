@@ -15,7 +15,7 @@
 
 
 ice_tarball=/mnt/vm-share/ice12/ICE-1.2-rhel7.tar.gz
-icedir=/mnt/vm-share/ice-work2
+icedir=/mnt/vm-share/ice-work4
 nodenames="d1a1 d1a2 d1a3 c1a4"
 monnames="d1a1 d1a2 d1a3"
 osdnodename=c1a4
@@ -34,7 +34,7 @@ calamari-ctl initialize
 
 ceph-deploy new $nodenames
 echo 'osd pool default size = 1' >> ceph.conf
-echo 'osd journal size = 1500' >> ceph.conf
+echo 'osd journal size = 2500' >> ceph.conf
 
 ceph-deploy install $nodenames
 ceph-deploy mon create-initial
@@ -45,6 +45,9 @@ mkdir /osd0
 ceph-deploy osd prepare $osdnodename:/osd0
 ceph-deploy osd activate $osdnodename:/osd0
 ceph-deploy mds create $osdnodename
+
+# creating backups though may not be necessary if cinder-backup
+# service not running
 
 ceph osd pool create volumes 128
 ceph osd pool create images 128
@@ -82,11 +85,18 @@ for h in $monnames; do
  rsync -a -e ssh /etc/ceph/ root@$h:/etc/ceph
 done
 
+export PATH=$PATH:/mnt/vm-share/vftool
 # not sure if this is necessary or not
-VMSET="monnames" vftool.bash run "chmod +r /etc/ceph/ceph.client.admin.keyring"
+VMSET="$monnames" vftool.bash run "chmod +r /etc/ceph/ceph.client.admin.keyring"
 chmod +r /etc/ceph/ceph.client.admin.keyring
+
+#
+VMSET="$monnames" vftool.bash run "service openstack-cinder-scheduler restart;
+service openstack-cinder-volume restart;
+service openstack-cinder-api restart"
 
 # now kick the tires
 #  ceph osd lspools
 #  echo test123 > /tmp/test123.txt; rados put test123 /tmp/test123.txt --pool=data
 #  rados -p data ls
+#  rados -p volumes ls
