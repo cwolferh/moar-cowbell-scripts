@@ -1,0 +1,11 @@
+---
+- :name: Controller (Nova Network)
+  :class: quickstack::nova_network::controller
+- :name: Compute (Nova Network) Non HA
+  :class: quickstack::nova_network::compute
+- :name: Controller (Neutron)
+  :class: quickstack::neutron::controller
+- :name: Compute (Neutron) Non HA
+  :class: quickstack::neutron::compute
+- :name: Neutron Networker
+  :class: quickstack::neutron::networker

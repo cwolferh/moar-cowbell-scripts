@@ -1,0 +1,97 @@
+# TODO add params that are not in puppet class below (i.e compute and
+# neutron-related)
+#
+#  quickstack::nova_network::controller:
+    admin_email: admin@example.com
+    admin_password: weakpw
+    amqp_ca: /etc/ipa/ca.crt
+    amqp_cert: /etc/pki/tls/certs/PRIV_HOST-amqp.crt
+    amqp_host: 192.168.201.210
+    amqp_key: /etc/pki/tls/private/PRIV_HOST-amqp.key
+    amqp_nssdb_password: weakpw
+    amqp_password: weakpw
+    amqp_provider: rabbitmq
+    amqp_username: openstack
+    auto_assign_floating_ip: 'True'
+    ceilometer_metering_secret: f2d663afaabde0e606b112ba49a1f195
+    ceilometer_user_password: weakpw
+    cinder_backend_eqlx: 'false'
+    cinder_backend_eqlx_name:
+    - eqlx_backend
+    cinder_backend_gluster: 'false'
+    cinder_backend_gluster_name: glusterfs_backend
+    cinder_backend_iscsi: 'false'
+    cinder_backend_iscsi_name: iscsi_backend
+    cinder_backend_nfs: 'false'
+    cinder_backend_nfs_name: nfs_backend
+    cinder_backend_rbd: 'true'
+    cinder_backend_rbd_name: rbd_backend
+    cinder_db_password: weakpw
+    cinder_eqlx_chap_login:
+    - chapadmin
+    cinder_eqlx_chap_password:
+    - f796ef89624961423783439a5e88019c
+    cinder_eqlx_group_name:
+    - group-0
+    cinder_eqlx_pool:
+    - default
+    cinder_eqlx_use_chap:
+    - 'false'
+    cinder_gluster_shares:
+    - 192.168.0.4:/cinder -o backup-volfile-servers=192.168.0.5
+    cinder_multiple_backends: 'false'
+    cinder_nfs_mount_options: ''
+    cinder_nfs_shares:
+    - 192.168.0.4:/cinder
+    cinder_rbd_ceph_conf: /etc/ceph/ceph.conf
+    cinder_rbd_flatten_volume_from_snapshot: 'false'
+    cinder_rbd_max_clone_depth: '5'
+    cinder_rbd_pool: volumes
+    cinder_rbd_secret_uuid: ''
+    cinder_rbd_user: volumes
+    cinder_san_ip:
+    - 192.168.124.11
+    cinder_san_login:
+    - grpadmin
+    cinder_san_password:
+    - de372f8e37157f0b15044f7731de770d
+    cinder_san_thin_provision:
+    - 'false'
+    cinder_user_password: weakpw
+    controller_admin_host: 192.168.201.210
+    controller_priv_host: 192.168.201.210
+    controller_pub_host: 192.168.201.210
+    freeipa: 'false'
+    glance_backend: rbd
+    glance_db_password: weakpw
+    glance_rbd_store_pool: images
+    glance_rbd_store_user: images
+    glance_user_password: weakpw
+    heat_auth_encrypt_key: efb06e152dae2c7f9136326e3d6828ec
+    heat_cfn: 'true'
+    heat_cloudwatch: 'false'
+    heat_db_password: weakpw
+    heat_user_password: weakpw
+    horizon_ca: /etc/ipa/ca.crt
+    horizon_cert: /etc/pki/tls/certs/PUB_HOST-horizon.crt
+    horizon_key: /etc/pki/tls/private/PUB_HOST-horizon.key
+    horizon_secret_key: 6e7f89c348fe400a297261c50cbc82c0
+    keystonerc: 'true'
+    keystone_admin_token: d65414418edec31ab94bca94f5020df8
+    keystone_db_password: weakpw
+    mysql_ca: /etc/ipa/ca.crt
+    mysql_cert: /etc/pki/tls/certs/PRIV_HOST-mysql.crt
+    mysql_host: 192.168.201.210
+    mysql_key: /etc/pki/tls/private/PRIV_HOST-mysql.key
+    mysql_root_password: weakpw
+    nova_db_password: weakpw
+    nova_default_floating_pool: nova
+    nova_user_password: weakpw
+    ssl: 'false'
+    swift_admin_password: weakpw
+    swift_ringserver_ip: 192.168.203.1
+    swift_shared_secret: 7b323f9f470adbde1f76730f13bc3fa8
+    swift_storage_device: device1
+    swift_storage_ips:
+    - 192.168.203.2
+    verbose: 'true'
