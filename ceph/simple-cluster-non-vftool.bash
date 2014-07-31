@@ -16,10 +16,10 @@
 
 
 ice_tarball=/mnt/vm-share/ice12/ICE-1.2-rhel7.tar.gz
-icedir=/mnt/vm-share/ice-work4
-nodenames="d1a1 d1a2 d1a3 d1a4 c1a4"
-monnames="d1a1 d1a2 d1a3"
-osdnodename=c1a4
+icedir=/root/ice
+nodenames="d1a1.example.com d1a2.example.com d1a3.example.com c1a4.example.com"
+monnames="d1a1.example.com d1a2.example.com d1a3.example.com"
+osdnodename=c1a4.example.com
 
 setup_ice_repo() {
   mkdir -p $icedir
@@ -47,12 +47,8 @@ ceph-deploy osd prepare $osdnodename:/osd0
 ceph-deploy osd activate $osdnodename:/osd0
 ceph-deploy mds create $osdnodename
 
-# creating backups though may not be necessary if cinder-backup
-# service not running
-
 ceph osd pool create volumes 128
 ceph osd pool create images 128
-ceph osd pool create backups 128
 
 ceph-authtool --create-keyring /etc/ceph/ceph.client.images.keyring
 chmod +r /etc/ceph/ceph.client.images.keyring
@@ -66,35 +62,20 @@ ceph-authtool /etc/ceph/ceph.client.volumes.keyring -n client.volumes --gen-key
 ceph-authtool -n client.volumes --cap mon 'allow r' --cap osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes' /etc/ceph/ceph.client.volumes.keyring
 ceph auth add client.volumes -i /etc/ceph/ceph.client.volumes.keyring
 
-ceph-authtool --create-keyring /etc/ceph/ceph.client.backups.keyring
-chmod +r /etc/ceph/ceph.client.backups.keyring
-ceph-authtool /etc/ceph/ceph.client.backups.keyring -n client.backups --gen-key
-ceph-authtool -n client.backups --cap mon 'allow r' --cap osd 'allow class-read object_prefix rbd_children, allow rwx pool=backups' /etc/ceph/ceph.client.backups.keyring
-ceph auth add client.backups -i /etc/ceph/ceph.client.backups.keyring
-
 echo '[client.images]
 keyring = /etc/ceph/ceph.client.images.keyring
 
 [client.volumes]
-keyring = /etc/ceph/ceph.client.volumes.keyring
-
-[client.backups]
-keyring = /etc/ceph/ceph.client.backups.keyring' >> /etc/ceph/ceph.conf
+keyring = /etc/ceph/ceph.client.volumes.keyring' >> /etc/ceph/ceph.conf
 
 
 for h in $monnames; do
  rsync -a -e ssh /etc/ceph/ root@$h:/etc/ceph
-done
-
-export PATH=$PATH:/mnt/vm-share/vftool
-# not sure if this is necessary or not
-VMSET="$monnames" vftool.bash run "chmod +r /etc/ceph/ceph.client.admin.keyring"
-chmod +r /etc/ceph/ceph.client.admin.keyring
-
-#
-VMSET="$monnames" vftool.bash run "service openstack-cinder-scheduler restart;
+ ssh root@$h "chmod +r /etc/ceph/ceph.client.admin.keyring;
+service openstack-cinder-scheduler restart;
 service openstack-cinder-volume restart;
 service openstack-cinder-api restart"
+done
 
 # now kick the tires
 #  ceph osd lspools
