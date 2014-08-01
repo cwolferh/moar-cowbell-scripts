@@ -3,9 +3,9 @@
 # Note there some interactive prompts in this script, so be prepared
 # to respond to those.
 #
-# This should set up one node with a single 1.5GB osd and a few
-# monitors.  Make sure to set the following *name* vars with vm's that
-# make sense for your setup.
+# This should set up one node with a single osd and a few monitors.
+# Make sure to set the following *name* vars with vm's that make sense
+# for your setup.
 #
 # Typical order of operations:
 #  * get an HA-all-in-one-controller running on nodes $monnames
@@ -35,7 +35,7 @@ calamari-ctl initialize
 
 ceph-deploy new $nodenames
 echo 'osd pool default size = 1' >> ceph.conf
-echo 'osd journal size = 2500' >> ceph.conf
+echo 'osd journal size = 1000' >> ceph.conf
 
 ceph-deploy install $nodenames
 ceph-deploy mon create-initial

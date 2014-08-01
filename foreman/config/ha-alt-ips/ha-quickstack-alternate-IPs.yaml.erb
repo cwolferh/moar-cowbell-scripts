@@ -33,12 +33,12 @@
     multiple_backends: false
     nfs_mount_options: ''
     nfs_shares: []
-#########    rbd_ceph_conf: /etc/ceph/ceph.conf
-#########    rbd_flatten_volume_from_snapshot: false
-#########    rbd_max_clone_depth: '5'
-#########    rbd_pool: volumes
+    rbd_ceph_conf: /etc/ceph/ceph.conf
+    rbd_flatten_volume_from_snapshot: false
+    rbd_max_clone_depth: '5'
+    rbd_pool: volumes
     secret_uuid: '77123ba2-ed14-4f28-a645-62699c647c53'
-#########    rbd_user: volumes
+    rbd_user: volumes
     rpc_backend: cinder.openstack.common.rpc.impl_kombu
     san_ip:
     - ''
@@ -89,8 +89,8 @@
     pcmk_fs_options: ''
     pcmk_fs_type: nfs
     pcmk_swift_is_local: 'false'
-#########    rbd_store_pool: images
-#########    rbd_store_user: ''
+    rbd_store_pool: images
+    rbd_store_user: images
     sql_idle_timeout: '3600'
     swift_store_auth_address: http://127.0.0.1:5000/v2.0/
     swift_store_key: ''
