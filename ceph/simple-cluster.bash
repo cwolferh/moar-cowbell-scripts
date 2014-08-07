@@ -17,8 +17,10 @@
 
 ice_tarball=/mnt/vm-share/ice12/ICE-1.2-rhel7.tar.gz
 icedir=/mnt/vm-share/ice-work4
-nodenames="d1a1 d1a2 d1a3 c1a4"
-monnames="d1a1 d1a2 d1a3"
+#nodenames="d1a1 d1a2 d1a3 c1a4"
+#monnames="d1a1 d1a2 d1a3"
+nodenames="c1a1 c1a4"
+monnames="c1a1"
 osdnodename=c1a4
 
 setup_ice_repo() {

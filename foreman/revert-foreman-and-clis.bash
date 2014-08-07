@@ -50,5 +50,5 @@ VMSET="$FOREMAN_NODE" vftool.bash wait_for_port 443
 
 if [ "$SKIP_FOREMAN_CLIENT_REGISTRATION" != "true" ]; then
   VMSET=$VMSET_TO_REGISTER vftool.bash run \
-     "bash -x ${FOREMAN_CLIENT_SCRIPT} ; service puppet stop" & 
+     "killall puppet; rm -rf /var/lib/puppet/ssl; bash -x ${FOREMAN_CLIENT_SCRIPT} ; service puppet stop" & 
 fi

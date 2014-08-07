@@ -1,3 +1,6 @@
+<% heat = 'false' %>
+<% neutron = 'false' %>
+---
     cinder_backend_rbd: 'true'
     db_ssl: false
     db_ssl_ca: ''
@@ -82,6 +85,7 @@
     wsrep_sst_username: sst_user
 #  quickstack::pacemaker::glance:
     backend: rbd
+#    backend: file
     filesystem_store_datadir: /var/lib/glance/images/
     pcmk_fs_device: 192.168.200.100:/mnt/glance
     pcmk_fs_dir: /var/lib/glance/images/
@@ -111,8 +115,8 @@
     cinder: 'true'
     db_type: mysql
     glance: 'true'
-    heat: 'false'
-    heat_cfn: 'false'
+    heat: <%= heat %>
+    heat_cfn: <%= heat %>
     idle_timeout: '200'
     keystonerc: 'true'
     nova: 'true'
@@ -200,12 +204,12 @@
     heat_admin_vip: 192.168.201.115
     heat_auth_encryption_key: weakpw
     heat_cfn_admin_vip: 192.168.201.128
-    heat_cfn_enabled: 'false'
+    heat_cfn_enabled: <%= heat %>
     heat_cfn_group: heat_cfn
     heat_cfn_private_vip: 192.168.201.127
     heat_cfn_public_vip: 192.168.201.126
     heat_cfn_user_password: weakpw
-    heat_cloudwatch_enabled: 'false'
+    heat_cloudwatch_enabled: <%= heat %>
     heat_db_password: '123456'
     heat_group: heat
     heat_private_vip: 192.168.201.117
@@ -218,13 +222,13 @@
     include_amqp: 'true'
     include_cinder: 'true'
     include_glance: 'true'
-    include_heat: 'false'
+    include_heat: '<%= heat %>'
     include_horizon: 'false'
     include_keystone: 'true'
     include_mysql: 'true'
-    include_neutron: 'false'
+    include_neutron: '<%= neutron %>'
     include_nova: 'true'
-    include_swift: 'false'
+    include_swift: 'true'
     keystone_admin_vip: 192.168.201.38
     keystone_db_password: '123456'
     keystone_group: keystone
@@ -241,7 +245,7 @@
     - c1a3
     loadbalancer_group: loadbalancer
     loadbalancer_vip: 192.168.201.54
-    neutron: 'false'
+    neutron: <%= neutron %>
     neutron_admin_vip: 192.168.201.108
     neutron_db_password: '123456'
     neutron_group: neutron

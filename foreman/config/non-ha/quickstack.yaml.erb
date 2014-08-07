@@ -1,3 +1,4 @@
+<% my_ip = '192.168.200.10' %>
 # TODO add params that are not in puppet class below (i.e compute and
 # neutron-related)
 #
@@ -6,7 +7,7 @@
     admin_password: weakpw
     amqp_ca: /etc/ipa/ca.crt
     amqp_cert: /etc/pki/tls/certs/PRIV_HOST-amqp.crt
-    amqp_host: 192.168.201.210
+    amqp_host: <%= my_ip %>
     amqp_key: /etc/pki/tls/private/PRIV_HOST-amqp.key
     amqp_nssdb_password: weakpw
     amqp_password: weakpw
@@ -58,9 +59,9 @@
     cinder_san_thin_provision:
     - 'false'
     cinder_user_password: weakpw
-    controller_admin_host: 192.168.201.210
-    controller_priv_host: 192.168.201.210
-    controller_pub_host: 192.168.201.210
+    controller_admin_host: <%= my_ip %>
+    controller_priv_host: <%= my_ip %>
+    controller_pub_host: <%= my_ip %>
     freeipa: 'false'
     glance_backend: rbd
     glance_db_password: weakpw
@@ -81,7 +82,7 @@
     keystone_db_password: weakpw
     mysql_ca: /etc/ipa/ca.crt
     mysql_cert: /etc/pki/tls/certs/PRIV_HOST-mysql.crt
-    mysql_host: 192.168.201.210
+    mysql_host: <%= my_ip %>
     mysql_key: /etc/pki/tls/private/PRIV_HOST-mysql.key
     mysql_root_password: weakpw
     nova_db_password: weakpw
