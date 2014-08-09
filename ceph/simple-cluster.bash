@@ -109,5 +109,17 @@ service openstack-cinder-api restart"
 #  source /root/keystonerc_admin
 # glance -d -v  image-create --name "littlecirros" --is-public true --disk-format qcow2 --container-format bare --file /mnt/vm-share/cirros-0.3.1-x86_64-disk.img
 # cinder create --display-name testv1 1
+# nova keypair-add testkey > /mnt/vm-share/nova-test.pem
+# (after compute is set up)
+# nova boot --image littlecirros --flavor m1.tiny  --key_name testkey vm1
+# nova attach <nova id> <cinder id> auto
 
-# on the compute: ssh -i /mnt/vm-share/nova-test.pem cirros@10.0.0.4
+# compute: 
+# host group: VMSET=fore4a vftool.bash run '/mnt/vm-share/mcs/foreman/api/hosts.rb set_hostgroup "Compute (Nova Network)" d1a4'
+# install: VMSET=c1a4 vftool.bash run ceph-deploy install d1a4
+# on the compute node:
+# verify /etc/ceph/*
+# bash -x /mnt/vm-share/mcs/ceph/libvirt-secret.bash
+# service openstack-nova-compute restart
+#
+# ssh -i /mnt/vm-share/nova-test.pem cirros@10.0.0.4
