@@ -25,7 +25,7 @@
     cinder_backend_iscsi_name: iscsi_backend
     cinder_backend_nfs: 'false'
     cinder_backend_nfs_name: nfs_backend
-    cinder_backend_rbd: 'true'
+    cinder_backend_rbd: 'false'
     cinder_backend_rbd_name: rbd_backend
     cinder_db_password: weakpw
     cinder_eqlx_chap_login:
@@ -63,7 +63,7 @@
     controller_priv_host: <%= my_ip %>
     controller_pub_host: <%= my_ip %>
     freeipa: 'false'
-    glance_backend: rbd
+    glance_backend: false
     glance_db_password: weakpw
     glance_rbd_store_pool: images
     glance_rbd_store_user: images

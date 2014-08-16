@@ -1,5 +1,8 @@
-<% heat = 'false' %>
+<% heat = 'true' %>
 <% neutron = 'false' %>
+<% privateip1 = '192.168.200.110' %>
+<% privateip2 = '192.168.200.120' %>
+<% privateip3 = '192.168.200.130' %>
 ---
     cinder_backend_rbd: 'true'
     db_ssl: false
@@ -18,9 +21,9 @@
     backend_glusterfs_name: glusterfs_backend
     backend_iscsi: false
     backend_iscsi_name: iscsi_backend
-    backend_nfs: false
+    backend_nfs: true
     backend_nfs_name: nfs_backend
-    backend_rbd: true
+    backend_rbd: false
     backend_rbd_name: rbd_backend
     eqlx_chap_login:
     - chapadmin
@@ -35,7 +38,8 @@
     glusterfs_shares: []
     multiple_backends: false
     nfs_mount_options: ''
-    nfs_shares: []
+    nfs_shares:
+    - 192.168.200.100:/mnt/cinder
     rbd_ceph_conf: /etc/ceph/ceph.conf
     rbd_flatten_volume_from_snapshot: false
     rbd_max_clone_depth: '5'
@@ -66,30 +70,30 @@
     fence_xvm_key_file_password: weakpw
     fence_xvm_manage_key_file: 'false'
     fencing_type: disabled
-    pacemaker_cluster_members: 192.168.200.110 192.168.200.120 192.168.200.130
+    pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
     pacemaker_cluster_name: openstack
 #  quickstack::pacemaker::galera:
     galera_monitor_password: weakpw
     galera_monitor_username: monitor_user
     mysql_root_password: mysqlrootpw
     wsrep_cluster_members:
-    - 192.168.200.110
-    - 192.168.200.120
-    - 192.168.200.130
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
     wsrep_cluster_name: galera_cluster
-    wsrep_ssl: true
+    wsrep_ssl: false
     wsrep_ssl_cert: /etc/pki/galera/galera.crt
     wsrep_ssl_key: /etc/pki/galera/galera.key
     wsrep_sst_method: rsync
     wsrep_sst_password: weakpw
     wsrep_sst_username: sst_user
 #  quickstack::pacemaker::glance:
-    backend: rbd
-#    backend: file
+#    backend: rbd
+    backend: file
     filesystem_store_datadir: /var/lib/glance/images/
     pcmk_fs_device: 192.168.200.100:/mnt/glance
     pcmk_fs_dir: /var/lib/glance/images/
-    pcmk_fs_manage: 'false'
+    pcmk_fs_manage: 'true'
     pcmk_fs_options: ''
     pcmk_fs_type: nfs
     pcmk_swift_is_local: 'false'
@@ -192,7 +196,7 @@
     cinder_private_vip: 192.168.201.87
     cinder_public_vip: 192.168.201.86
     cinder_user_password: weakpw
-    cluster_control_ip: 192.168.200.120
+    cluster_control_ip: <%= privateip2 %>
     db_group: db
     db_vip: 192.168.201.8
     glance_admin_vip: 192.168.201.28
@@ -221,14 +225,14 @@
     horizon_public_vip: 192.168.201.96
     include_amqp: 'true'
     include_cinder: 'true'
-    include_glance: 'true'
+    include_glance: 'false'
     include_heat: '<%= heat %>'
     include_horizon: 'false'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
     include_nova: 'true'
-    include_swift: 'true'
+    include_swift: 'false'
     keystone_admin_vip: 192.168.201.38
     keystone_db_password: '123456'
     keystone_group: keystone
@@ -236,9 +240,9 @@
     keystone_public_vip: 192.168.201.36
     keystone_user_password: weakpw
     lb_backend_server_addrs:
-    - 192.168.200.110
-    - 192.168.200.120
-    - 192.168.200.130
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
     lb_backend_server_names:
     - c1a1
     - c1a2
