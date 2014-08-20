@@ -16,6 +16,11 @@
     auto_assign_floating_ip: 'True'
     ceilometer_metering_secret: f2d663afaabde0e606b112ba49a1f195
     ceilometer_user_password: weakpw
+    ceph_fsid: be9f8d8f-f63f-4fbc-b27e-ddfe2bf82fad
+    ceph_images_key: AQBl5NlTKMsvMhAAXxkeO+h4fN3GH59GAAkfcw==
+    ceph_volumes_key: AQBm5NlT6ANrAxAACMAgoMMTPN5qiRCtqqNBCw==
+    ceph_mon_host: c1a1
+    ceph_mon_initial_members: 192.168.200.10
     cinder_backend_eqlx: 'false'
     cinder_backend_eqlx_name:
     - eqlx_backend
@@ -63,7 +68,7 @@
     controller_priv_host: <%= my_ip %>
     controller_pub_host: <%= my_ip %>
     freeipa: 'false'
-    glance_backend: false
+    glance_backend: rbd
     glance_db_password: weakpw
     glance_rbd_store_pool: images
     glance_rbd_store_user: images
