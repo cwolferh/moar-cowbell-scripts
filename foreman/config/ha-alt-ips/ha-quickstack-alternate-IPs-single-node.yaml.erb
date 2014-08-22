@@ -1,10 +1,17 @@
+<% privateip1 = '192.168.200.140' %>
+---
 # in theory, you could run quickstack_defaul.ts.rb using this yaml
 # file after running with ha-quickstack-alternate-IPs.yaml.erb, and
 # you would get a one node cluster setup.
-    pacemaker_cluster_members: 192.168.200.110
+    pacemaker_cluster_members: <%= privateip1 %>
     wsrep_cluster_members:
-    - 192.168.200.110
+    - <%= privateip1 %>
     lb_backend_server_addrs:
-    - 192.168.200.110
+    - <%= privateip1 %>
     lb_backend_server_names:
     - c1a1
+    cluster_control_ip: <%= privateip1 %>
+    ceph_mon_host:
+    - <%= privateip1 %>
+    ceph_mon_initial_members:
+    - <%= privateip1 %>
