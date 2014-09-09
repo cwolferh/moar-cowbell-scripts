@@ -16,11 +16,11 @@
 
 
 ice_tarball=/mnt/vm-share/ice12/ICE-1.2-rhel7.tar.gz
-icedir=/mnt/vm-share/ice-work4
-#nodenames="d1a1 d1a2 d1a3 c1a4"
-#monnames="d1a1 d1a2 d1a3"
-nodenames="c1a1 c1a4"
-monnames="c1a1"
+icedir=/mnt/vm-share/ice-work5
+nodenames="c1a1 c1a2 c1a3 c1a4"
+monnames="c1a1 c1a2 c1a3"
+#nodenames="c1a1 c1a4"
+#monnames="c1a1"
 osdnodename=c1a4
 
 setup_ice_repo() {
@@ -35,14 +35,26 @@ cd $icedir
 
 calamari-ctl initialize
 
+ceph-deploy purge $nodenames
+ceph-dpeloy purgedata $nodenames
+
 ceph-deploy new $nodenames
 echo 'osd pool default size = 1' >> ceph.conf
 echo 'osd journal size = 1000' >> ceph.conf
+echo 'HIT A KEY TO CONTINUE'; read
 
 ceph-deploy install $nodenames
+echo 'HIT A KEY TO CONTINUE'; read
+
 ceph-deploy mon create-initial
+echo 'HIT A KEY TO CONTINUE'; read
+
 ceph-deploy mon create $monnames
+echo 'HIT A KEY TO CONTINUE'; read
+
 ceph-deploy gatherkeys $nodenames
+
+echo 'HIT A KEY TO CONTINUE'; read
 
 mkdir /osd0
 ceph-deploy osd prepare $osdnodename:/osd0
@@ -83,7 +95,7 @@ keyring = /etc/ceph/ceph.client.volumes.keyring' >> /etc/ceph/ceph.conf
 #[client.backups]
 #keyring = /etc/ceph/ceph.client.backups.keyring' >> /etc/ceph/ceph.conf
 
-
+VMSET="$monnames" vftool.bash run yum -y install rsync
 for h in $monnames; do
  rsync -a -e ssh /etc/ceph/ root@$h:/etc/ceph
 done

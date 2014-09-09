@@ -1,8 +1,8 @@
 <% heat = 'true' %>
-<% neutron = 'false' %>
-<% privateip1 = '192.168.200.210' %>
-<% privateip2 = '192.168.200.220' %>
-<% privateip3 = '192.168.200.230' %>
+<% neutron = 'true' %>
+<% privateip1 = '192.168.200.10' %>
+<% privateip2 = '192.168.200.20' %>
+<% privateip3 = '192.168.200.30' %>
 ---
     db_ssl: false
     db_ssl_ca: ''
@@ -11,6 +11,8 @@
     memcached_port: '11211'
     neutron_metadata_proxy_secret: weakpw
     verbose: 'true'
+    cinder_backend_rbd: true
+    glance_backend_rbd: true
 #  quickstack::pacemaker::cinder:
     backend_eqlx: false
     backend_eqlx_name:
@@ -79,7 +81,7 @@
     - <%= privateip2 %>
     - <%= privateip3 %>
     wsrep_cluster_name: galera_cluster
-    wsrep_ssl: true
+    wsrep_ssl: false
     wsrep_ssl_cert: /etc/pki/galera/galera.crt
     wsrep_ssl_key: /etc/pki/galera/galera.key
     wsrep_sst_method: rsync
@@ -186,6 +188,19 @@
     ceilometer_private_vip: ''
     ceilometer_public_vip: ''
     ceilometer_user_password: weakpw
+    ceph_fsid: '904c8491-5c16-4dae-9cc3-6ce633a7f4cc'
+    ceph_images_key: 'AQCZqf9TaMxUAxAAfNymZz22eTHUW+ixQXDkAw=='
+    ceph_mon_host:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    ceph_mon_initial_members:
+    - c1a1
+    - c1a2
+    - c1a3
+    ceph_volumes_key: 'AQCZqf9TCDO6DxAAr+lt1MFfNDK1KEUBUrI2PA=='
+    ceph_public_network: 192.168.7.0/24
+    ceph_cluster_network: 192.168.200.0/24
     cinder_admin_vip: 192.168.201.85
     cinder_db_password: '123456'
     cinder_group: cinder
@@ -222,7 +237,7 @@
     include_amqp: 'true'
     include_cinder: 'true'
     include_glance: 'true'
-    include_heat: 'true'
+    include_heat: '<%= heat %>'
     include_horizon: 'true'
     include_keystone: 'true'
     include_mysql: 'true'
