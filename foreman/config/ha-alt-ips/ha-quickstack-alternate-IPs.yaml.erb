@@ -1,4 +1,4 @@
-<% heat = 'false' %>
+<% heat = 'true' %>
 <% neutron = 'false' %>
 <% privateip1 = '192.168.200.110' %>
 <% privateip2 = '192.168.200.120' %>
@@ -240,7 +240,7 @@
     include_cinder: 'true'
     include_glance: 'true'
     include_heat: '<%= heat %>'
-    include_horizon: 'false'
+    include_horizon: 'true'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
