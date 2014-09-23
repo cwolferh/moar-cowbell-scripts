@@ -8,3 +8,5 @@
 nodename=c1a4
 VMSET=c1a4 vftool.bash run "yum -y install rsync"
 rsync -e ssh -a  /root/.ssh/id_rsa* root@$nodename:/root/.ssh
+rsync -e ssh -a  /root/.ssh/known_hosts root@$nodename:/root/.ssh
+#rsync -e ssh -a  /root/.ssh/ root@$nodename:/root/.ssh

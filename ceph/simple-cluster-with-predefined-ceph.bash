@@ -9,7 +9,7 @@
 #  * make sure the 3 ha controller nodes/mons have not run puppet yet.
 #     (i.e., they are not yet configured as ha controllers,
 #      just a fresh OS)
-#  * prep this host to be enable ssh to the mons/compute ( see 
+#  * prep this host to be enable ssh to the mons/compute ( see
 #     bm-simple-server-prep.bash )
 #  * run this script *on the $osdnodename vm*
 #
@@ -20,7 +20,9 @@
 #    when http://tracker.ceph.com/issues/9510 lands.
 
 nodenames="c1a1 c1a2 c1a3 c1a4"
-monnames="c1a1 c1a2 c1a3"
+#monnames="c1a1 c1a2 c1a3"
+monnames_to_ips="c1a1:192.168.200.10 c1a2:192.168.200.20 c1a3:192.168.200.30"
+firstmon=c1a1
 #nodenames="c1a1 c1a4"
 #monnames="c1a1"
 osdnodename=c1a4
@@ -45,17 +47,24 @@ cp -r $workdir/ceph.* /etc/ceph/
 ceph-deploy --ceph-conf $cephconf install $nodenames
 echo 'HIT A KEY TO CONTINUE'; read
 
-ceph-deploy --ceph-conf $cephconf mon create-initial
+#####################
+## BEGIN ALTERNATIVE TO ceph-deploy mon create-initial ##
+
+ceph-deploy mon create $monnames_to_ips
 echo 'HIT A KEY TO CONTINUE'; read
 
-# below are redundant according to expert
-#ceph-deploy --ceph-conf $cephconf mon create $monnames
-#echo 'HIT A KEY TO CONTINUE'; read
-#ceph-deploy --ceph-conf $cephconf gatherkeys $nodenames
-#echo 'HIT A KEY TO CONTINUE'; read
-
-ceph-deploy admin $osdnodename
+ssh $firstmon 'while ! eval "ceph -s"; do sleep 5; echo .; done'
+rsync -a -e ssh root@$firstmon:/etc/ceph/ceph.client.admin.keyring /etc/ceph/
 echo 'HIT A KEY TO CONTINUE'; read
+
+ceph-deploy gatherkeys $firstmon
+echo 'HIT A KEY TO CONTINUE'; read
+
+ceph-deploy gatherkeys $osdnodename
+echo 'HIT A KEY TO CONTINUE'; read
+
+### END ALTERNATIVE TO ceph-deploy mon create-initial ##
+#####################
 
 mkdir /osd0
 # need to specify overwrite since files are not identical bit-wise (but they are functionally identical)
@@ -96,7 +105,7 @@ ceph-deploy --overwrite-conf admin $computenodes
 # nova boot --image littlecirros --flavor m1.tiny  --key_name testkey vm1
 # nova attach <nova id> <cinder id> auto
 
-# compute: 
+# compute:
 # host group: VMSET=fore4a vftool.bash run '/mnt/vm-share/mcs/foreman/api/hosts.rb set_hostgroup "Compute (Nova Network)" d1a4'
 # install: VMSET=c1a4 vftool.bash run ceph-deploy install d1a4
 # on the compute node:
