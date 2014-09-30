@@ -202,8 +202,8 @@
     - c1a2
     - c1a3
     ceph_volumes_key: 'AQAfHBdUsFPTHhAAfqVqPq31FFCvyyO7oaOQXw=='
-    ceph_public_network: 192.168.7.0/24
-    ceph_cluster_network: 192.168.200.0/24
+    ceph_public_network: 192.168.200.0/24
+    ceph_cluster_network: 192.168.201.0/24
     ceph_osd_pool_size: 1
     ceph_osd_pool_default_size: 1
     cinder_admin_vip: 192.168.201.85
