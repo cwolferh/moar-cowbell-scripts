@@ -324,3 +324,20 @@
     nova_db_password: '123456'
     nova_host: 192.168.201.63
     ssl: 'false'
+#  quickstack::ceph::config:
+    fsid: '904c8491-5c16-4dae-9cc3-6ce633a7f4cc'
+    images_key: 'AQAfHBdUKLnUFxAAtO7WPKQZ8QfEoGqH0CLd7A=='
+    mon_host:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    mon_initial_members:
+    - c1a1
+    - c1a2
+    - c1a3
+    volumes_key: 'AQAfHBdUsFPTHhAAfqVqPq31FFCvyyO7oaOQXw=='
+    public_network: 192.168.200.0/24
+    cluster_network: 192.168.201.0/24
+    osd_pool_size: '1'
+    osd_pool_default_size: '1'
+    osd_journal_size: '1000'

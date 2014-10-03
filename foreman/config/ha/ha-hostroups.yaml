@@ -1,4 +1,6 @@
 ---
+- :name: Ceph Storage Node
+  :class: quickstack::ceph::config
 - :name: Compute (Nova Network)
   :class: quickstack::nova_network::compute
 - :name: Compute (Neutron)

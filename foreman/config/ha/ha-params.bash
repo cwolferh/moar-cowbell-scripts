@@ -9,6 +9,9 @@ if $(rpm -q --queryformat "%{RPMTAG_VERSION}" foreman | grep -qP '^(2|1.[6789])'
 
   /usr/share/openstack-foreman-installer/bin/quickstack_defaults.rb \
     -d $scriptdir/ha-quickstack.yaml.erb \
+    -g $scriptdir/ha-hostroups.yaml hostgroups -v
+  /usr/share/openstack-foreman-installer/bin/quickstack_defaults.rb \
+    -d $scriptdir/ha-quickstack.yaml.erb \
     -g $scriptdir/ha-hostroups.yaml parameters -v
 
 else

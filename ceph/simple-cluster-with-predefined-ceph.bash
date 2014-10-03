@@ -32,17 +32,40 @@ workdir=/root
 
 export PATH=$PATH:/mnt/vm-share/vftool
 VMSET=$nodenames vftool.bash run "cp /mnt/vm-share/ceph-firefly.repo /etc/yum.repos.d/ceph-firefly.repo"
-yum -y install ceph-deploy
+yum -y install ceph-deploy ceph-common
 
 cd $workdir
 
-cp /mnt/vm-share/tmp/ceph.conf $workdir/ceph.conf
-chmod ugo-wx $workdir/ceph.conf
-cp /mnt/vm-share/tmp/ceph.client.volumes.keyring $workdir/ceph.client.volumes.keyring
-cp /mnt/vm-share/tmp/ceph.client.images.keyring $workdir/ceph.client.images.keyring
-cp /mnt/vm-share/tmp/ceph.mon.keyring $workdir/ceph.mon.keyring
-mkdir -p /etc/ceph/
-cp -r $workdir/ceph.* /etc/ceph/
+prod_workflow=true
+if [ "$prod_workflow" = 'true' ]; then
+
+  # assume the following already exists (e.g., because this is the storage
+  # node and the puppet agent has run and created the files):
+  #   /etc/ceph/ceph.conf, 
+  #   /etc/ceph/ceph.client.volumes.keyring
+  #   /etc/ceph/ceph.client.images.keyring
+
+  # ceph-deploy still needs a ceph.mon.keyring, so create on
+  echo '[mon.]' >/etc/ceph/ceph.mon.keyring
+  echo "key = `ceph-authtool --gen-print-key`" >>/etc/ceph/ceph.mon.keyring
+  echo 'caps mon = allow *' >>/etc/ceph/ceph.mon.keyring
+
+  cp /etc/ceph/ceph.* $workdir
+
+else
+
+  # development workflow
+  cp /mnt/vm-share/tmp/ceph.conf $workdir/ceph.conf
+  chmod ugo-wx $workdir/ceph.conf
+  cp /mnt/vm-share/tmp/ceph.client.volumes.keyring $workdir/ceph.client.volumes.keyring
+  cp /mnt/vm-share/tmp/ceph.client.images.keyring $workdir/ceph.client.images.keyring
+  cp /mnt/vm-share/tmp/ceph.mon.keyring $workdir/ceph.mon.keyring
+  mkdir -p /etc/ceph/
+  cp -r $workdir/ceph.* /etc/ceph/
+
+fi
+echo 'HIT A KEY TO CONTINUE'; read
+
 
 ceph-deploy --ceph-conf $cephconf install $nodenames
 echo 'HIT A KEY TO CONTINUE'; read
@@ -103,7 +126,7 @@ ceph-deploy --overwrite-conf admin $computenodes
 # nova keypair-add testkey >/mnt/vm-share/nova-test.pem
 # (after compute is set up)
 # nova boot --image littlecirros --flavor m1.tiny  --key_name testkey vm1
-# nova attach <nova id> <cinder id> auto
+# nova volume-attach <nova id> <cinder id> auto
 
 # compute:
 # host group: VMSET=fore4a vftool.bash run '/mnt/vm-share/mcs/foreman/api/hosts.rb set_hostgroup "Compute (Nova Network)" d1a4'
