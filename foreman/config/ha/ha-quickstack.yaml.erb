@@ -21,9 +21,9 @@
     backend_glusterfs_name: glusterfs_backend
     backend_iscsi: false
     backend_iscsi_name: iscsi_backend
-    backend_nfs: false
+    backend_nfs: true
     backend_nfs_name: nfs_backend
-    backend_rbd: true
+    backend_rbd: false
     backend_rbd_name: rbd_backend
     eqlx_chap_login:
     - chapadmin
@@ -70,6 +70,7 @@
     fence_xvm_key_file_password: weakpw
     fence_xvm_manage_key_file: 'false'
     fencing_type: disabled
+    #fencing_type: fence_xvm
     pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
     pacemaker_cluster_name: openstackHA
 #  quickstack::pacemaker::galera:
@@ -88,11 +89,11 @@
     wsrep_sst_password: weakpw
     wsrep_sst_username: sst_user
 #  quickstack::pacemaker::glance:
-    backend: rbd
+    backend: file
     filesystem_store_datadir: /var/lib/glance/images/
     pcmk_fs_device: 192.168.200.100:/mnt/glance
     pcmk_fs_dir: /var/lib/glance/images/
-    pcmk_fs_manage: 'false'
+    pcmk_fs_manage: 'true'
     pcmk_fs_options: ''
     pcmk_fs_type: nfs
     pcmk_swift_is_local: 'false'
