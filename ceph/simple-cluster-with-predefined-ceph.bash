@@ -31,6 +31,7 @@ cephconf=/mnt/vm-share/tmp/ceph.conf
 workdir=/root
 
 export PATH=$PATH:/mnt/vm-share/vftool
+# https://gist.githubusercontent.com/cwolferh/da15f47b2659173b84fe/raw/6069e0760a95dbf54715eb67f6a2ef168312448e/ceph-firefly.repo
 VMSET=$nodenames vftool.bash run "cp /mnt/vm-share/ceph-firefly.repo /etc/yum.repos.d/ceph-firefly.repo"
 yum -y install ceph-deploy ceph-common
 
@@ -70,9 +71,6 @@ echo 'HIT A KEY TO CONTINUE'; read
 ceph-deploy --ceph-conf $cephconf install $nodenames
 echo 'HIT A KEY TO CONTINUE'; read
 
-#####################
-## BEGIN ALTERNATIVE TO ceph-deploy mon create-initial ##
-
 ceph-deploy mon create $monnames_to_ips
 echo 'HIT A KEY TO CONTINUE'; read
 
@@ -85,9 +83,6 @@ echo 'HIT A KEY TO CONTINUE'; read
 
 ceph-deploy gatherkeys $osdnodename
 echo 'HIT A KEY TO CONTINUE'; read
-
-### END ALTERNATIVE TO ceph-deploy mon create-initial ##
-#####################
 
 mkdir /osd0
 # need to specify overwrite since files are not identical bit-wise (but they are functionally identical)
@@ -110,6 +105,7 @@ ceph auth import -i /etc/ceph/ceph.client.volumes.keyring
 #   More context:
 #     Quickstack::Compute_common/Exec[set-secret-value virsh]
 #     /usr/bin/virsh secret-set-value --secret $(cat /etc/nova/virsh.secret) --base64 $(ceph auth get-key client.volumes)
+# Note, you may need to create /etc/ceph/ on the the compute node
 ceph-deploy --overwrite-conf admin $computenodes
 
 # now kick the tires
@@ -133,7 +129,5 @@ ceph-deploy --overwrite-conf admin $computenodes
 # install: VMSET=c1a4 vftool.bash run ceph-deploy install d1a4
 # on the compute node:
 # verify /etc/ceph/*
-# bash -x /mnt/vm-share/mcs/ceph/libvirt-secret.bash
-# service openstack-nova-compute restart
 #
 # ssh -i /mnt/vm-share/nova-test.pem cirros@10.0.0.4

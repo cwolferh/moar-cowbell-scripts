@@ -1,4 +1,4 @@
-<% heat = 'true' %>
+<% heat = 'false' %>
 <% neutron = 'false' %>
 <% privateip1 = '192.168.200.10' %>
 <% privateip2 = '192.168.200.20' %>
@@ -14,29 +14,35 @@
     cinder_backend_rbd: true
     glance_backend_rbd: true
 #  quickstack::pacemaker::cinder:
-    backend_eqlx: false
+    backend_eqlx: true
     backend_eqlx_name:
-    - eqlx_backend
+    - eqlx
+    - eqlx2
     backend_glusterfs: false
-    backend_glusterfs_name: glusterfs_backend
-    backend_iscsi: false
-    backend_iscsi_name: iscsi_backend
+    backend_glusterfs_name: glusterfs
+    backend_iscsi: true
+    backend_iscsi_name: iscsi
     backend_nfs: true
-    backend_nfs_name: nfs_backend
+    backend_nfs_name: nfs
     backend_rbd: false
-    backend_rbd_name: rbd_backend
+    backend_rbd_name: rbd
+    create_backend_types: true
     eqlx_chap_login:
+    - chapadmin
     - chapadmin
     eqlx_chap_password:
     - ''
     eqlx_group_name:
     - group-0
+    - group-1
     eqlx_pool:
     - default
+    - default2
     eqlx_use_chap:
     - false
+    - false
     glusterfs_shares: []
-    multiple_backends: false
+    multiple_backends: true
     nfs_mount_options: ''
     nfs_shares:
     - 192.168.200.100:/mnt/cinder
@@ -49,11 +55,15 @@
     rpc_backend: cinder.openstack.common.rpc.impl_kombu
     san_ip:
     - ''
+    - ''
     san_login:
+    - grpadmin
     - grpadmin
     san_password:
     - ''
+    - ''
     san_thin_provision:
+    - false
     - false
     volume: true
 #  quickstack::pacemaker::common:
@@ -245,7 +255,7 @@
     include_cinder: 'true'
     include_glance: 'true'
     include_heat: '<%= heat %>'
-    include_horizon: 'true'
+    include_horizon: 'false'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
@@ -296,8 +306,8 @@
     - 192.168.111.14
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.13
-#    amqp_provider: rabbitmq
-    amqp_provider: qpid
+    amqp_provider: rabbitmq
+#    amqp_provider: qpid
     amqp_ssl_port: '5671'
     auth_host: 192.168.201.33
     # don't matter with false ceilometer
