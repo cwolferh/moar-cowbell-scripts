@@ -22,15 +22,15 @@ PUPPET_GLUSTER=${PUPPET_GLUSTER:=/mnt/vm-share/puppet-openstack-storage}
 
 #yum -y install /mnt/vm-share/openstack-puppet-modules-2014.1-16.2.el7ost.noarch.rpm 
 
+# a hook for a wrapper script to have its way
+if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
+  bash -x /mnt/vm-share/pre-foreman-install.bash
+fi
+
 if [ "$FROM_SOURCE" = "true" ]; then
   mv /usr/share/openstack-foreman-installer /usr/share/openstack-foreman-installer-RPM-ORIG
   cp -ra $ASTAPOR /usr/share/openstack-foreman-installer
   find /usr/share/openstack-foreman-installer -name '.git' | xargs rm -rf
-fi
-
-# a hook for a wrapper script to have its way
-if [ -f /mnt/vm-share/pre-foreman-install.bash ]; then
-  bash -x /mnt/vm-share/pre-foreman-install.bash
 fi
 
 if $(rpm -q --queryformat "%{RPMTAG_VERSION}" foreman | grep -qP '^(2|1.[6789])') ; then
