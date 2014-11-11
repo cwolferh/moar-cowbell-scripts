@@ -71,7 +71,7 @@ echo 'HIT A KEY TO CONTINUE'; read
 ceph-deploy --ceph-conf $cephconf install $nodenames
 echo 'HIT A KEY TO CONTINUE'; read
 
-ceph-deploy mon create $monnames_to_ips
+ceph-deploy --overwrite-conf mon create $monnames_to_ips
 echo 'HIT A KEY TO CONTINUE'; read
 
 ssh $firstmon 'while ! eval "ceph -s"; do sleep 5; echo .; done'
