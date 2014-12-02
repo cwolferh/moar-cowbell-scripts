@@ -1,4 +1,4 @@
-<% heat = 'true' %>
+<% heat = 'false' %>
 <% neutron = 'false' %>
 <% privateip1 = '192.168.200.10' %>
 <% privateip2 = '192.168.200.20' %>
@@ -75,7 +75,7 @@
     pacemaker_cluster_name: openstackHA
 #  quickstack::pacemaker::galera:
     galera_monitor_password: weakpw
-    galera_monitor_username: monitor_user
+    galera_monitor_username: glrmtr
     mysql_root_password: mysqlrootpw
     wsrep_cluster_members:
     - <%= privateip1 %>
@@ -251,6 +251,8 @@
     include_neutron: '<%= neutron %>'
     include_nova: 'true'
     include_swift: 'false'
+    include_ceilometer: 'false'
+    include_nosql: 'false'
     keystone_admin_vip: 192.168.201.35
     keystone_db_password: '123456'
     keystone_group: keystone
@@ -262,9 +264,9 @@
     - <%= privateip2 %>
     - <%= privateip3 %>
     lb_backend_server_names:
-    - c1a1
-    - c1a2
-    - c1a3
+    - pcmk-10
+    - pcmk-20
+    - pcmk-30
     loadbalancer_group: loadbalancer
     loadbalancer_vip: 192.168.201.53
     neutron: <%= neutron %>
@@ -296,8 +298,8 @@
     - 192.168.111.14
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.13
-#    amqp_provider: rabbitmq
-    amqp_provider: qpid
+    amqp_provider: rabbitmq
+#    amqp_provider: qpid
     amqp_ssl_port: '5671'
     auth_host: 192.168.201.33
     # don't matter with false ceilometer

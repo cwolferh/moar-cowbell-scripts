@@ -1,4 +1,4 @@
-<% heat = 'true' %>
+<% heat = 'false' %>
 <% neutron = 'false' %>
 <% privateip1 = '192.168.200.110' %>
 <% privateip2 = '192.168.200.120' %>
@@ -237,14 +237,14 @@
     horizon_private_vip: 192.168.201.96
     horizon_public_vip: 192.168.201.96
     include_amqp: 'true'
-    include_cinder: 'true'
-    include_glance: 'true'
+    include_cinder: 'false'
+    include_glance: 'false'
     include_heat: '<%= heat %>'
-    include_horizon: 'true'
-    include_keystone: 'true'
-    include_mysql: 'true'
+    include_horizon: 'false'
+    include_keystone: 'false'
+    include_mysql: 'false'
     include_neutron: '<%= neutron %>'
-    include_nova: 'true'
+    include_nova: 'false'
     include_swift: 'false'
     keystone_admin_vip: 192.168.201.38
     keystone_db_password: '123456'
@@ -257,9 +257,9 @@
     - <%= privateip2 %>
     - <%= privateip3 %>
     lb_backend_server_names:
-    - c1a1
-    - c1a2
-    - c1a3
+    - pcmk-10
+    - pcmk-20
+    - pcmk-30
     loadbalancer_group: loadbalancer
     loadbalancer_vip: 192.168.201.54
     neutron: <%= neutron %>
@@ -291,7 +291,8 @@
     - 192.168.111.14
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.14
-    amqp_provider: qpid
+    amqp_provider: rabbitmq
+#    amqp_provider: qpid
     amqp_ssl_port: '5671'
     auth_host: 192.168.201.36
     # don't matter with false ceilometer
