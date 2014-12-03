@@ -1,0 +1,23 @@
+---
+- :name: Neutron HA Compute
+  :class: quickstack::neutron::compute
+- :name: Neutron HA AIO Controller
+  :class:
+  - quickstack::openstack_common
+  - quickstack::pacemaker::common
+  - quickstack::pacemaker::params
+  - quickstack::pacemaker::keystone
+  - quickstack::pacemaker::swift
+  - quickstack::pacemaker::load_balancer
+  - quickstack::pacemaker::memcached
+  - quickstack::pacemaker::qpid
+  - quickstack::pacemaker::rabbitmq
+  - quickstack::pacemaker::glance
+  - quickstack::pacemaker::nova
+  - quickstack::pacemaker::heat
+  - quickstack::pacemaker::cinder
+  - quickstack::pacemaker::horizon
+  - quickstack::pacemaker::galera
+  - quickstack::pacemaker::neutron
+  - quickstack::pacemaker::nosql
+  - quickstack::pacemaker::ceilometer
