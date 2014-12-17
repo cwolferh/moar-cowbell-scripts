@@ -23,3 +23,5 @@
   - quickstack::pacemaker::horizon
   - quickstack::pacemaker::galera
   - quickstack::pacemaker::neutron
+  - quickstack::pacemaker::nosql
+  - quickstack::pacemaker::ceilometer

@@ -1,8 +1,11 @@
-<% heat = 'true' %>
-<% neutron = 'true' %>
+<% heat = 'false' %>
+<% neutron = 'false' %>
 <% privateip1 = '192.168.200.10' %>
 <% privateip2 = '192.168.200.20' %>
 <% privateip3 = '192.168.200.30' %>
+<% pcmkip1 = '192.168.201.10' %>
+<% pcmkip2 = '192.168.201.20' %>
+<% pcmkip3 = '192.168.201.30' %>
 ---
     db_ssl: false
     db_ssl_ca: ''
@@ -251,8 +254,8 @@
     include_neutron: '<%= neutron %>'
     include_nova: 'true'
     include_swift: 'false'
-    include_ceilometer: 'true'
-    include_nosql: 'true'
+    include_ceilometer: 'false'
+    include_nosql: 'false'
     keystone_admin_vip: 192.168.201.35
     keystone_db_password: '123456'
     keystone_group: keystone
@@ -268,13 +271,13 @@
     - lb-c1a2
     - lb-c1a3
     pcmk_server_addrs:
-    - <%= privateip1 %>
-    - <%= privateip2 %>
-    - <%= privateip3 %>
+    - <%= pcmkip1 %>
+    - <%= pcmkip2 %>
+    - <%= pcmkip3 %>
     pcmk_server_names:
-    - lb-c1a1
-    - lb-c1a2
-    - lb-c1a3
+    - pcmk-c1a1
+    - pcmk-c1a2
+    - pcmk-c1a3
     loadbalancer_group: loadbalancer
     loadbalancer_vip: 192.168.201.53
     neutron: <%= neutron %>
@@ -293,7 +296,7 @@
     private_iface: eth2
     private_ip: ''
     private_network: ''
-    pcmk_iface: eth2
+    pcmk_iface: eth3
     pcmk_ip: ''
     pcmk_network: ''
     swift_group: swift

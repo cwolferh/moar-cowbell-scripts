@@ -73,6 +73,14 @@
     #fencing_type: fence_xvm
     pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
     pacemaker_cluster_name: openstackHA
+    pcmk_server_addrs:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    pcmk_server_names:
+    - pcmk-c1a1
+    - pcmk-c1a2
+    - pcmk-c1a3
 #  quickstack::pacemaker::galera:
     galera_monitor_password: weakpw
     galera_monitor_username: monitor_user
@@ -281,6 +289,9 @@
     nova_private_vip: 192.168.201.64
     nova_public_vip: 192.168.201.63
     nova_user_password: weakpw
+    pcmk_iface: eth2
+    pcmk_ip: ''
+    pcmk_network: ''
     private_iface: eth2
     private_ip: ''
     private_network: ''
