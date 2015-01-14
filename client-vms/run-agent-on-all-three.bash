@@ -4,8 +4,14 @@ thedir=/mnt/vm-share/logs/`date +%s`
 mkdir -p $thedir
 lastvm=$(echo $VMSET | perl -p -e 's/^.*\s+(\S+)$/$1/')
 
+cat >/mnt/vm-share/puppet-with-timestamp.sh <<EOF
+puppet agent -tvd --trace --color=false 2>&1 | awk -v hostname=\$(hostname -s) '{print hostname" " strftime("%H:%M:%S") " " \$0}'
+
+EOF
+
+
 for vm in $VMSET; do
- cmd="puppet agent -tvd --trace --color=false 2>&1 | tee $thedir/$vm-puppet-out.txt"
+ cmd="bash /mnt/vm-share/puppet-with-timestamp.sh | tee $thedir/$vm-puppet-out.txt"
  VMSET=$vm vftool.bash run $cmd &
  test "$vm" == "$lastvm" || sleep $SLEEP
 done
