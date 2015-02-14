@@ -8,6 +8,7 @@
 - :name: HA All In One Controller Large
   :class:
   - quickstack::openstack_common
+  - quickstack::ntp
   - quickstack::pacemaker::common
   - quickstack::pacemaker::params
   - quickstack::pacemaker::keystone
