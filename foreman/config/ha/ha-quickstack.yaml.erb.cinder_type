@@ -352,3 +352,8 @@
     osd_pool_size: '1'
     osd_pool_default_size: '1'
     osd_journal_size: '1000'
+    rabbit_hosts:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    rabbitmq_use_addrs_not_vip: true

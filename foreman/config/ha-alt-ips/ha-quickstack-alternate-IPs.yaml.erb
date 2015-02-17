@@ -320,3 +320,8 @@
     nova_db_password: '123456'
     nova_host: 192.168.201.66
     ssl: 'false'
+    rabbit_hosts:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    rabbitmq_use_addrs_not_vip: true
