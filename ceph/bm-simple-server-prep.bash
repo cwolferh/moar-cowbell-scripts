@@ -5,8 +5,8 @@
 #
 # To be run on bare-metal host.
 
-nodename=c1a4
-VMSET=c1a4 vftool.bash run "yum -y install rsync"
+nodename=e1a4
+VMSET=$nodename vftool.bash run "yum -y install rsync"
 rsync -e ssh -a  /root/.ssh/id_rsa* root@$nodename:/root/.ssh
 rsync -e ssh -a  /root/.ssh/known_hosts root@$nodename:/root/.ssh
 #rsync -e ssh -a  /root/.ssh/ root@$nodename:/root/.ssh

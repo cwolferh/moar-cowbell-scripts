@@ -19,20 +19,26 @@
 #  * For now, ceph.mon.keyring needs to exist too but won't be needed
 #    when http://tracker.ceph.com/issues/9510 lands.
 
-nodenames="c1a1 c1a2 c1a3 c1a4"
-#monnames="c1a1 c1a2 c1a3"
-monnames_to_ips="c1a1:192.168.200.10 c1a2:192.168.200.20 c1a3:192.168.200.30"
-firstmon=c1a1
-#nodenames="c1a1 c1a4"
-#monnames="c1a1"
-osdnodename=c1a4
-computenodes=d1a4
+nodenames="e1a1 e1a2 e1a3 e1a4"
+#monnames="e1a1 e1a2 e1a3"
+#monnames_to_ips="e1a1:192.168.200.10 e1a2:192.168.200.20 e1a3:192.168.200.30"
+monnames_to_ips="e1a1:192.168.200.110 e1a2:192.168.200.120 e1a3:192.168.200.130"
+firstmon=e1a1
+#nodenames="e1a1 e1a4"
+#monnames="e1a1"
+osdnodename=e1a4
+computenodes=d1a1
 cephconf=/mnt/vm-share/tmp/ceph.conf
 workdir=/root
 
 export PATH=$PATH:/mnt/vm-share/vftool
+
+# ok for rhel 7.0
 # https://gist.githubusercontent.com/cwolferh/da15f47b2659173b84fe/raw/6069e0760a95dbf54715eb67f6a2ef168312448e/ceph-firefly.repo
-VMSET=$nodenames vftool.bash run "cp /mnt/vm-share/ceph-firefly.repo /etc/yum.repos.d/ceph-firefly.repo"
+#VMSET=$nodenames vftool.bash run "cp /mnt/vm-share/ceph-firefly.repo /etc/yum.repos.d/ceph-firefly.repo"
+
+# need a newer ceph repo for 7.1
+#VMSET=$nodenames vftool.bash run "cp /mnt/vm-share/ceph-122.repo /etc/yum.repos.d/ceph-122.repo"
 yum -y install ceph-deploy ceph-common
 
 cd $workdir
@@ -85,10 +91,13 @@ ceph-deploy gatherkeys $osdnodename
 echo 'HIT A KEY TO CONTINUE'; read
 
 mkdir /osd0
+mkdir /osd1
 # need to specify overwrite since files are not identical bit-wise (but they are functionally identical)
 ceph-deploy --overwrite-conf osd prepare $osdnodename:/osd0
 ceph-deploy osd activate $osdnodename:/osd0
-ceph-deploy mds create $osdnodename
+#ceph-deploy --overwrite-conf osd prepare $osdnodename:/osd1
+#ceph-deploy osd activate $osdnodename:/osd1
+#ceph-deploy mds create $osdnodename
 
 # creating backups though may not be necessary if cinder-backup
 # service not running
@@ -126,7 +135,7 @@ ceph-deploy --overwrite-conf admin $computenodes
 
 # compute:
 # host group: VMSET=fore4a vftool.bash run '/mnt/vm-share/mcs/foreman/api/hosts.rb set_hostgroup "Compute (Nova Network)" d1a4'
-# install: VMSET=c1a4 vftool.bash run ceph-deploy install d1a4
+# install: VMSET=e1a4 vftool.bash run ceph-deploy install d1a4
 # on the compute node:
 # verify /etc/ceph/*
 #
