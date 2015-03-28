@@ -1,10 +1,16 @@
 ---
 - :name: Ceph Storage Node
-  :class: quickstack::ceph::config
+  :class:
+  - quickstack::ntp
+  - quickstack::ceph::config
 - :name: Compute (Nova Network)
-  :class: quickstack::nova_network::compute
+  :class:
+  - quickstack::ntp
+  - quickstack::nova_network::compute
 - :name: Compute (Neutron)
-  :class: quickstack::neutron::compute
+  :class:
+  - quickstack::ntp
+  - quickstack::neutron::compute
 - :name: HA All In One Controller
   :class:
   - quickstack::openstack_common
