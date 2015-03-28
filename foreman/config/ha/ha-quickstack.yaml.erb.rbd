@@ -70,8 +70,17 @@
     fence_xvm_key_file_password: weakpw
     fence_xvm_manage_key_file: 'false'
     fencing_type: disabled
+    #fencing_type: fence_xvm
     pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
     pacemaker_cluster_name: openstackHA
+    pcmk_server_addrs:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    pcmk_server_names:
+    - pcmk-c1a1
+    - pcmk-c1a2
+    - pcmk-c1a3
 #  quickstack::pacemaker::galera:
     galera_monitor_password: weakpw
     galera_monitor_username: monitor_user
@@ -128,8 +137,8 @@
     swift: 'false'
     token_driver: keystone.token.backends.sql.Token
     token_format: PKI
-#  quickstack::pacemaker::load_balancer: 
-#  quickstack::pacemaker::memcached: 
+#  quickstack::pacemaker::load_balancer:
+#  quickstack::pacemaker::memcached:
 #  quickstack::pacemaker::neutron:
     core_plugin: neutron.plugins.ml2.plugin.Ml2Plugin
     enable_tunneling: 'true'
@@ -156,19 +165,18 @@
     - gre
     - vxlan
     ml2_vxlan_group: 224.0.0.1
-    ovs_bridge_mappings: []
-#    - ext-vlan:br-ex
-    ovs_bridge_uplinks: []
-#    - br-ex:eth6
+    ovs_bridge_mappings:
+    - ext-vlan:br-ex
+    ovs_bridge_uplinks:
+    - br-ex:eth6
     ovs_tunnel_iface: eth6
     ovs_tunnel_network: ''
-#    ovs_tunnel_types:
-#    - vxlan
-    ovs_tunnel_types: []
-    ovs_vlan_ranges: ext-vlan:1000:2000
+    ovs_tunnel_types:
+    - vxlan
+    ovs_vlan_ranges: ext-vlan:100:200
     ovs_vxlan_udp_port: '4789'
     tenant_network_type: vlan
-    tunnel_id_ranges: 1:1000
+    tunnel_id_ranges: 1:100
 #  quickstack::pacemaker::nova:
     auto_assign_floating_ip: 'True'
     default_floating_pool: nova
@@ -183,10 +191,10 @@
     amqp_port: '5672'
     amqp_username: openstack
     amqp_vip: 192.168.201.13
-    ceilometer_admin_vip: ''
+    ceilometer_admin_vip: '192.168.201.88'
     ceilometer_group: ceilometer
-    ceilometer_private_vip: ''
-    ceilometer_public_vip: ''
+    ceilometer_private_vip: '192.168.201.87'
+    ceilometer_public_vip: '192.168.201.86'
     ceilometer_user_password: weakpw
     ceph_fsid: '904c8491-5c16-4dae-9cc3-6ce633a7f4cc'
     ceph_images_key: 'AQAfHBdUKLnUFxAAtO7WPKQZ8QfEoGqH0CLd7A=='
@@ -239,16 +247,18 @@
     horizon_admin_vip: 192.168.201.95
     horizon_group: horizon
     horizon_private_vip: 192.168.201.94
-    horizon_public_vip: 192.168.201.93
+    horizon_public_vip: 192.168.7.100
     include_amqp: 'true'
     include_cinder: 'true'
+    include_ceilometer: 'false'
     include_glance: 'true'
     include_heat: '<%= heat %>'
-    include_horizon: 'false'
+    include_horizon: 'true'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
     include_nova: 'true'
+    include_nosql: 'false'
     include_swift: 'false'
     keystone_admin_vip: 192.168.201.35
     keystone_db_password: '123456'
@@ -261,9 +271,9 @@
     - <%= privateip2 %>
     - <%= privateip3 %>
     lb_backend_server_names:
-    - c1a1
-    - c1a2
-    - c1a3
+    - pcmk-c1a1
+    - pcmk-c1a2
+    - pcmk-c1a3
     loadbalancer_group: loadbalancer
     loadbalancer_vip: 192.168.201.53
     neutron: <%= neutron %>
@@ -279,6 +289,9 @@
     nova_private_vip: 192.168.201.64
     nova_public_vip: 192.168.201.63
     nova_user_password: weakpw
+    pcmk_iface: eth2
+    pcmk_ip: ''
+    pcmk_network: ''
     private_iface: eth2
     private_ip: ''
     private_network: ''
@@ -295,35 +308,25 @@
     - 192.168.111.14
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.13
-#    amqp_provider: rabbitmq
-    amqp_provider: qpid
+    amqp_provider: rabbitmq
     amqp_ssl_port: '5671'
-    auth_host: 192.168.201.33
-    # don't matter with false ceilometer
-    #ceilometer_metering_secret: ad28a30791819b323769996da7f046e3
-    #ceilometer_user_password: 9790e2f72de98c855795ae96d8f4e772
+    auth_host: 192.168.201.35
+    ceilometer_metering_secret: weakpw
+    ceilometer_user_password: weakpw
     cinder_backend_gluster: 'false'
     cinder_backend_nfs: 'false'
     glance_host: 192.168.201.23
     mysql_ca: /etc/ipa/ca.crt
     mysql_host: 192.168.201.7
-    network_create_networks: true
-    network_fixed_range: 10.0.0.0/24
-    network_floating_range: 10.0.1.0/24
-    network_manager: FlatDHCPManager
-    network_network_size: ''
-    network_num_networks: 1
-    ## commenting out because results in the following in foreman yaml
-    ##   network_overrides: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
-    ##network_overrides:
-    ##  force_dhcp_release: false
-    network_private_iface: eth5
-    network_private_network: 192.168.203.0
-    network_public_iface: eth6
-    network_public_network: 192.168.204.0
     nova_db_password: '123456'
     nova_host: 192.168.201.63
+    neutron_host: 192.168.201.104
     ssl: 'false'
+    rabbit_hosts:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    rabbitmq_use_addrs_not_vip: true
 #  quickstack::ceph::config:
     fsid: '904c8491-5c16-4dae-9cc3-6ce633a7f4cc'
     images_key: 'AQAfHBdUKLnUFxAAtO7WPKQZ8QfEoGqH0CLd7A=='
@@ -341,8 +344,3 @@
     osd_pool_size: '1'
     osd_pool_default_size: '1'
     osd_journal_size: '1000'
-    rabbit_hosts:
-    - <%= privateip1 %>
-    - <%= privateip2 %>
-    - <%= privateip3 %>
-    rabbitmq_use_addrs_not_vip: true
