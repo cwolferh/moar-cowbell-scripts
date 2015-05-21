@@ -6,7 +6,7 @@
 ---
     db_ssl: false
     db_ssl_ca: ''
-    debug: false
+    debug: true
     enabled: true
     memcached_port: '11211'
     neutron_metadata_proxy_secret: weakpw
@@ -135,8 +135,8 @@
     public_protocol: http
     region: RegionOne
     swift: 'false'
-    token_driver: keystone.token.backends.sql.Token
-    token_format: PKI
+    token_driver: keystone.token.persistence.backends.sql.Token
+    token_format: keystone.token.providers.pki.Provider
 #  quickstack::pacemaker::load_balancer:
 #  quickstack::pacemaker::memcached:
 #  quickstack::pacemaker::neutron:
@@ -230,8 +230,9 @@
     glance_private_vip: 192.168.201.24
     glance_public_vip: 192.168.201.23
     glance_user_password: weakpw
+    hacluster_pwd: weakpw
     heat_admin_vip: 192.168.201.115
-    heat_auth_encryption_key: weakpw
+    heat_auth_encryption_key: weakpw1234567890
     heat_cfn_admin_vip: 192.168.201.125
     heat_cfn_enabled: <%= heat %>
     heat_cfn_group: heat_cfn
