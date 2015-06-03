@@ -1,18 +1,47 @@
-<% heat = 'true' %>
-<% neutron = 'true' %>
+<% ceph = true %>
+<% heat = 'false' %>
+<% neutron = 'false' %>
 <% privateip1 = '192.168.200.10' %>
 <% privateip2 = '192.168.200.20' %>
 <% privateip3 = '192.168.200.30' %>
+
+<% osp_release = 'osp6'
+   if osp_release == 'osp7'
+     token_driver = 'keystone.token.persistence.backends.sql.Token'
+     token_format = 'keystone.token.providers.pki.Provider'
+   else
+     token_driver = 'keystone.token.backends.sql.Token'
+     token_format = 'PKI'
+   end
+%>
+
+<%# pcmk network same as lb network %>
+<% pcmkip1 = '192.168.200.10' %>
+<% pcmkip2 = '192.168.200.20' %>
+<% pcmkip3 = '192.168.200.30' %>
+<% pcmkname1 = 'lb-c1a1' %>
+<% pcmkname2 = 'lb-c1a2' %>
+<% pcmkname3 = 'lb-c1a3' %>
+<% pcmkiface = 'eth2' %>
+
+<%# separate pcmk network %>
+<%# pcmkip1 = '192.168.201.10' %>
+<%# pcmkip2 = '192.168.201.20' %>
+<%# pcmkip3 = '192.168.201.30' %>
+<%# pcmkname1 = 'pcmk-c1a1' %>
+<%# pcmkname2 = 'pcmk-c1a2' %>
+<%# pcmkname3 = 'pcmk-c1a3' %>
+<%# pcmkiface = 'eth3' %>
 ---
     db_ssl: false
     db_ssl_ca: ''
-    debug: false
+    debug: true
     enabled: true
     memcached_port: '11211'
     neutron_metadata_proxy_secret: weakpw
     verbose: 'true'
-    cinder_backend_rbd: true
-    glance_backend_rbd: true
+    cinder_backend_rbd: <%= ceph %>
+    glance_backend_rbd: <%= ceph %>
 #  quickstack::pacemaker::cinder:
     backend_eqlx: false
     backend_eqlx_name:
@@ -21,9 +50,9 @@
     backend_glusterfs_name: glusterfs_backend
     backend_iscsi: false
     backend_iscsi_name: iscsi_backend
-    backend_nfs: true
+    backend_nfs: <%= !ceph %>
     backend_nfs_name: nfs_backend
-    backend_rbd: false
+    backend_rbd: <%= ceph %>
     backend_rbd_name: rbd_backend
     eqlx_chap_login:
     - chapadmin
@@ -57,6 +86,7 @@
     - false
     volume: true
 #  quickstack::pacemaker::common:
+    hacluster_pwd: 'somepw'
     fence_ipmilan_address: ''
     fence_ipmilan_expose_lanplus: 'true'
     fence_ipmilan_hostlist: ''
@@ -73,9 +103,17 @@
     #fencing_type: fence_xvm
     pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
     pacemaker_cluster_name: openstackHA
+    pcmk_server_addrs:
+    - <%= pcmkip1 %>
+    - <%= pcmkip2 %>
+    - <%= pcmkip3 %>
+    pcmk_server_names:
+    - <%= pcmkname1 %>
+    - <%= pcmkname2 %>
+    - <%= pcmkname3 %>
 #  quickstack::pacemaker::galera:
     galera_monitor_password: weakpw
-    galera_monitor_username: glrmtr
+    galera_monitor_username: monitor_user
     mysql_root_password: mysqlrootpw
     wsrep_cluster_members:
     - <%= privateip1 %>
@@ -89,11 +127,11 @@
     wsrep_sst_password: weakpw
     wsrep_sst_username: sst_user
 #  quickstack::pacemaker::glance:
-    backend: file
+    backend: <%= ceph ? 'rbd' : 'file' %>
     filesystem_store_datadir: /var/lib/glance/images/
     pcmk_fs_device: 192.168.200.100:/mnt/glance
     pcmk_fs_dir: /var/lib/glance/images/
-    pcmk_fs_manage: 'true'
+    pcmk_fs_manage: '<%= !ceph %>'
     pcmk_fs_options: ''
     pcmk_fs_type: nfs
     pcmk_swift_is_local: 'false'
@@ -115,7 +153,7 @@
     admin_password: weakpw
     admin_tenant: admin
     admin_token: weakpw
-    ceilometer: 'false'
+    ceilometer: 'true'
     cinder: 'true'
     db_type: mysql
     glance: 'true'
@@ -127,10 +165,10 @@
     public_protocol: http
     region: RegionOne
     swift: 'false'
-    token_driver: keystone.token.backends.sql.Token
-    token_format: PKI
-#  quickstack::pacemaker::load_balancer: 
-#  quickstack::pacemaker::memcached: 
+    token_driver: <%= token_driver %>
+    token_format: <%= token_format %>
+#  quickstack::pacemaker::load_balancer:
+#  quickstack::pacemaker::memcached:
 #  quickstack::pacemaker::neutron:
     core_plugin: neutron.plugins.ml2.plugin.Ml2Plugin
     enable_tunneling: 'true'
@@ -157,19 +195,18 @@
     - gre
     - vxlan
     ml2_vxlan_group: 224.0.0.1
-    ovs_bridge_mappings: []
-#    - ext-vlan:br-ex
-    ovs_bridge_uplinks: []
-#    - br-ex:eth6
+    ovs_bridge_mappings:
+    - ext-vlan:br-ex
+    ovs_bridge_uplinks:
+    - br-ex:eth6
     ovs_tunnel_iface: eth6
     ovs_tunnel_network: ''
-#    ovs_tunnel_types:
-#    - vxlan
-    ovs_tunnel_types: []
-    ovs_vlan_ranges: ext-vlan:1000:2000
+    ovs_tunnel_types:
+    - vxlan
+    ovs_vlan_ranges: ext-vlan:100:200
     ovs_vxlan_udp_port: '4789'
     tenant_network_type: vlan
-    tunnel_id_ranges: 1:1000
+    tunnel_id_ranges: 1:100
 #  quickstack::pacemaker::nova:
     auto_assign_floating_ip: 'True'
     default_floating_pool: nova
@@ -224,7 +261,7 @@
     glance_public_vip: 192.168.201.23
     glance_user_password: weakpw
     heat_admin_vip: 192.168.201.115
-    heat_auth_encryption_key: weakpw
+    heat_auth_encryption_key: weakpw1234567890
     heat_cfn_admin_vip: 192.168.201.125
     heat_cfn_enabled: <%= heat %>
     heat_cfn_group: heat_cfn
@@ -240,19 +277,19 @@
     horizon_admin_vip: 192.168.201.95
     horizon_group: horizon
     horizon_private_vip: 192.168.201.94
-    horizon_public_vip: 192.168.201.93
+    horizon_public_vip: 192.168.7.100
     include_amqp: 'true'
-    include_cinder: 'true'
+    include_cinder: 'false'
+    include_ceilometer: 'true'
     include_glance: 'true'
     include_heat: '<%= heat %>'
-    include_horizon: 'true'
+    include_horizon: 'false'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
-    include_nova: 'true'
-    include_swift: 'false'
-    include_ceilometer: 'true'
+    include_nova: 'false'
     include_nosql: 'true'
+    include_swift: 'false'
     keystone_admin_vip: 192.168.201.35
     keystone_db_password: '123456'
     keystone_group: keystone
@@ -264,14 +301,6 @@
     - <%= privateip2 %>
     - <%= privateip3 %>
     lb_backend_server_names:
-    - lb-c1a1
-    - lb-c1a2
-    - lb-c1a3
-    pcmk_server_addrs:
-    - <%= privateip1 %>
-    - <%= privateip2 %>
-    - <%= privateip3 %>
-    pcmk_server_names:
     - lb-c1a1
     - lb-c1a2
     - lb-c1a3
@@ -290,12 +319,13 @@
     nova_private_vip: 192.168.201.64
     nova_public_vip: 192.168.201.63
     nova_user_password: weakpw
+    pcmk_iface: <%= pcmkiface %> 
+    pcmk_ip: ''
+    pcmk_network: ''
     private_iface: eth2
     private_ip: ''
     private_network: ''
-    pcmk_iface: eth2
-    pcmk_ip: ''
-    pcmk_network: ''
+    redis_vip: 192.168.201.56
     swift_group: swift
     swift_public_vip: 192.168.201.73
     swift_user_password: weakpw
@@ -307,37 +337,30 @@
     swift_storage_device: device1
     swift_storage_ips:
     - 192.168.111.14
+#  quickstack::pacemaker::ceilometer:
+    coordination_backend: redis
 # quickstack::nova_network::compute:
     amqp_host: 192.168.201.13
     amqp_provider: rabbitmq
-#    amqp_provider: qpid
+    #amqp_provider: qpid
     amqp_ssl_port: '5671'
-    auth_host: 192.168.201.33
-    # don't matter with false ceilometer
-    #ceilometer_metering_secret: ad28a30791819b323769996da7f046e3
-    #ceilometer_user_password: 9790e2f72de98c855795ae96d8f4e772
+    auth_host: 192.168.201.35
+    ceilometer_metering_secret: weakpw
+    ceilometer_user_password: weakpw
     cinder_backend_gluster: 'false'
-    cinder_backend_nfs: 'false'
+    cinder_backend_nfs: 'true'
     glance_host: 192.168.201.23
     mysql_ca: /etc/ipa/ca.crt
     mysql_host: 192.168.201.7
-    network_create_networks: true
-    network_fixed_range: 10.0.0.0/24
-    network_floating_range: 10.0.1.0/24
-    network_manager: FlatDHCPManager
-    network_network_size: ''
-    network_num_networks: 1
-    ## commenting out because results in the following in foreman yaml
-    ##   network_overrides: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
-    ##network_overrides:
-    ##  force_dhcp_release: false
-    network_private_iface: eth5
-    network_private_network: 192.168.203.0
-    network_public_iface: eth6
-    network_public_network: 192.168.204.0
     nova_db_password: '123456'
     nova_host: 192.168.201.63
+    neutron_host: 192.168.201.104
     ssl: 'false'
+    rabbit_hosts:
+    - <%= privateip1 %>
+    - <%= privateip2 %>
+    - <%= privateip3 %>
+    rabbitmq_use_addrs_not_vip: true
 #  quickstack::ceph::config:
     fsid: '904c8491-5c16-4dae-9cc3-6ce633a7f4cc'
     images_key: 'AQAfHBdUKLnUFxAAtO7WPKQZ8QfEoGqH0CLd7A=='

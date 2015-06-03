@@ -10,6 +10,7 @@ FOREMAN_SNAPNAME=${FOREMAN_SNAPNAME:=just_the_rpms}
 DUMP_ASTAPOR_OUTPUT=${DUMP_ASTAPOR_OUTPUT:=true}
 FROM_SOURCE=${FROM_SOURCE:=true}
 REVERT_FROM_SNAP=${REVERT_FROM_SNAP:=true}
+ASTAPOR=${ASTAPOR:=/mnt/vm-share/astapor}
 
 PROVISIONING_MODE=${PROVISIONING_MODE:=false}
 # only applicable for provisioning mode
@@ -34,7 +35,7 @@ VMSET=$FOREMAN_NODE vftool.bash wait_for_port 22
 #fi
 
 echo "prep foreman-server"
-VMSET=$FOREMAN_NODE vftool.bash run "FROM_SOURCE=${FROM_SOURCE} bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
+VMSET=$FOREMAN_NODE vftool.bash run "ASTAPOR=${ASTAPOR} FROM_SOURCE=${FROM_SOURCE} bash -x $MCS_SCRIPTS_DIR/foreman/prep-foreman-server.bash"
 
 echo "running foreman_server.sh"
 if [ $DUMP_ASTAPOR_OUTPUT = "true" ]; then
