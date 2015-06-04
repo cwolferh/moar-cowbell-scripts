@@ -147,7 +147,6 @@
     - ! '*'
     ml2_mechanism_drivers:
     - openvswitch
-    - l2population
     ml2_network_vlan_ranges:
     - yourphysnet:10:50
     ml2_security_group: 'True'
@@ -169,8 +168,8 @@
     - ext-vlan:br-ex
     ovs_bridge_uplinks:
     - br-ex:eth6
-    ovs_tunnel_iface: eth6
-    ovs_tunnel_network: ''
+    ovs_tunnel_iface: ''
+    ovs_tunnel_network: 192.168.116.0
     ovs_tunnel_types:
     - vxlan
     ovs_vlan_ranges: ext-vlan:100:200
@@ -288,7 +287,7 @@
     nova_db_password: '123456'
     nova_group: nova
     nova_private_vip: 192.168.201.64
-    nova_public_vip: 192.168.201.63
+    nova_public_vip: 192.168.7.101
     nova_user_password: weakpw
     pcmk_iface: eth2
     pcmk_ip: ''
@@ -296,6 +295,7 @@
     private_iface: eth2
     private_ip: ''
     private_network: ''
+    redis_vip: 192.168.201.14
     swift_group: swift
     swift_public_vip: 192.168.201.73
     swift_user_password: weakpw
@@ -322,6 +322,7 @@
     nova_db_password: '123456'
     nova_host: 192.168.201.63
     neutron_host: 192.168.201.104
+    ovs_l2_population: False
     ssl: 'false'
     rabbit_hosts:
     - <%= privateip1 %>
