@@ -1,17 +1,16 @@
-<% ceph = true %>
-<% heat = 'false' %>
-<% neutron = 'false' %>
+<% ceph = false %>
+<% heat = 'true' %>
+<% ceilo = true %>
+<% neutron = 'true' %>
 <% privateip1 = '192.168.200.10' %>
 <% privateip2 = '192.168.200.20' %>
 <% privateip3 = '192.168.200.30' %>
 
-<% osp_release = 'osp6'
+<% osp_release = 'osp7'
    if osp_release == 'osp7'
      token_driver = 'keystone.token.persistence.backends.sql.Token'
-     token_format = 'keystone.token.providers.pki.Provider'
    else
      token_driver = 'keystone.token.backends.sql.Token'
-     token_format = 'PKI'
    end
 %>
 
@@ -90,18 +89,26 @@
     fence_ipmilan_address: ''
     fence_ipmilan_expose_lanplus: 'true'
     fence_ipmilan_hostlist: ''
-    fence_ipmilan_host_to_address: []
+    fence_ipmilan_host_to_address:
+    - <%= pcmkname1 %>
+    - '172.2.2.1'
+    - <%= pcmkname2 %>
+    - '172.2.2.2'
+    - <%= pcmkname3 %>
+    - '172.2.2.3'
     fence_ipmilan_interval: 60s
-    fence_ipmilan_lanplus_options: ''
-    fence_ipmilan_password: ''
-    fence_ipmilan_username: ''
+    fence_ipmilan_lanplus_options: 'my_lpotions'
+    fence_ipmilan_password: 'ipmipw'
+    fence_ipmilan_username: 'ipminame'
     fence_xvm_clu_iface: eth2
     fence_xvm_clu_network: ''
     fence_xvm_key_file_password: weakpw
     fence_xvm_manage_key_file: 'false'
     fencing_type: disabled
     #fencing_type: fence_xvm
-    pacemaker_cluster_members: <%= privateip1 %> <%= privateip2 %> <%= privateip3 %>
+    #fencing_type: fence_ipmilan
+    # pacemaker_cluster_members: ignored / not used in osp6 or beyond 
+    # pacemaker_cluster_members: <%= pcmkip1 %> <%= pcmkip2 %> <%= pcmkip3 %> 
     pacemaker_cluster_name: openstackHA
     pcmk_server_addrs:
     - <%= pcmkip1 %>
@@ -153,7 +160,7 @@
     admin_password: weakpw
     admin_tenant: admin
     admin_token: weakpw
-    ceilometer: 'true'
+    ceilometer: '<%= ceilo %>'
     cinder: 'true'
     db_type: mysql
     glance: 'true'
@@ -166,7 +173,7 @@
     region: RegionOne
     swift: 'false'
     token_driver: <%= token_driver %>
-    token_format: <%= token_format %>
+#    token_format: 'PKI'   # does not exist pre-osp7.  delete this line when verified can live without it in osp6
 #  quickstack::pacemaker::load_balancer:
 #  quickstack::pacemaker::memcached:
 #  quickstack::pacemaker::neutron:
@@ -177,7 +184,6 @@
     - ! '*'
     ml2_mechanism_drivers:
     - openvswitch
-    - l2population
     ml2_network_vlan_ranges:
     - yourphysnet:10:50
     ml2_security_group: 'True'
@@ -199,8 +205,8 @@
     - ext-vlan:br-ex
     ovs_bridge_uplinks:
     - br-ex:eth6
-    ovs_tunnel_iface: eth6
-    ovs_tunnel_network: ''
+    ovs_tunnel_iface: ''
+    ovs_tunnel_network: '192.168.116.0'
     ovs_tunnel_types:
     - vxlan
     ovs_vlan_ranges: ext-vlan:100:200
@@ -279,16 +285,16 @@
     horizon_private_vip: 192.168.201.94
     horizon_public_vip: 192.168.7.100
     include_amqp: 'true'
-    include_cinder: 'false'
-    include_ceilometer: 'true'
+    include_cinder: 'true'
+    include_ceilometer: '<%= ceilo %>'
     include_glance: 'true'
     include_heat: '<%= heat %>'
-    include_horizon: 'false'
+    include_horizon: 'true'
     include_keystone: 'true'
     include_mysql: 'true'
     include_neutron: '<%= neutron %>'
-    include_nova: 'false'
-    include_nosql: 'true'
+    include_nova: 'true'
+    include_nosql: '<%= ceilo %>'
     include_swift: 'false'
     keystone_admin_vip: 192.168.201.35
     keystone_db_password: '123456'
@@ -339,7 +345,9 @@
     - 192.168.111.14
 #  quickstack::pacemaker::ceilometer:
     coordination_backend: redis
-# quickstack::nova_network::compute:
+# quickstack::neutron::compute:
+    ovs_l2_population: False
+# quickstack::(nova_network|neutron)::compute:
     amqp_host: 192.168.201.13
     amqp_provider: rabbitmq
     #amqp_provider: qpid
@@ -348,7 +356,7 @@
     ceilometer_metering_secret: weakpw
     ceilometer_user_password: weakpw
     cinder_backend_gluster: 'false'
-    cinder_backend_nfs: 'true'
+    cinder_backend_nfs: '<%= !ceph %>'
     glance_host: 192.168.201.23
     mysql_ca: /etc/ipa/ca.crt
     mysql_host: 192.168.201.7
@@ -378,8 +386,3 @@
     osd_pool_size: '1'
     osd_pool_default_size: '1'
     osd_journal_size: '1000'
-    rabbit_hosts:
-    - <%= privateip1 %>
-    - <%= privateip2 %>
-    - <%= privateip3 %>
-    rabbitmq_use_addrs_not_vip: true
